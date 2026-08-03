@@ -16,28 +16,28 @@
   },
   "results": {
     "brian": {
-      "score": 84.8,
-      "hueErr": 4.274039586441752,
-      "conf": 0.9603571650025808
+      "score": 85,
+      "hueErr": 4.200287892828644,
+      "conf": 0.9610868380035494
     },
     "mlp": {
       "mlp-1pass": {
         "label": "MLP, H=125, one pass",
         "params": 7153,
-        "score": 95.8,
-        "hueErr": 1.5883385034683735
+        "score": 95.7,
+        "hueErr": 1.5429016513046043
       },
       "mlp-20ep": {
         "label": "MLP, H=125, 20 epochs",
         "params": 7153,
-        "score": 96.6,
-        "hueErr": 1.2873500703295233
+        "score": 96.9,
+        "hueErr": 1.2931571302027973
       },
       "mlp-big-20ep": {
         "label": "MLP, H=251, 20 epochs",
         "params": 14335,
         "score": 96.8,
-        "hueErr": 1.297555069303137
+        "hueErr": 1.2648484156601665
       }
     },
     "curves": {
@@ -371,5 +371,5 @@
       ]
     }
   },
-  "totalMs": 83693
+  "totalMs": 89533
 }

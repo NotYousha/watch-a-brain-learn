@@ -102,6 +102,7 @@ Nothing loads from the network, so conference wifi failing changes nothing.
 
 ### The numbers behind it
 
+`FEATURES.md` is a complete reference for every feature, panel, key and file.
 `RESULTS.md` holds the study: seed variance over 20 seeds, ablations, parameter
 sweeps, lesion curves, and a backpropagation baseline. Regenerate with
 `node _dev/experiments.js` and `node _dev/baseline.js`. `_dev/RUNBOOK.md` has a

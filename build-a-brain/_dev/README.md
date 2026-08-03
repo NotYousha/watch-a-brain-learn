@@ -646,13 +646,13 @@ same 64 held-out probes, and the same scorer. Not a copy of the scorer:
 `predict(color)` with the same shape. There is exactly one scoring implementation,
 so the two cannot be measured differently even by accident.
 
-The MLP also gets a longer run than Brian if it wants one. Both a single pass over
-the 4000 examples, which matches Brian's exposure, and 20 epochs over the same
+The MLP also gets a longer run than the Hebbian network if it wants one. Both a single pass over
+the 4000 examples, which matches the Hebbian network's exposure, and 20 epochs over the same
 4000, which gives backprop 20 times the compute, are reported.
 
 ### Parameter counts
 
-Brian has 7168 learnable parameters, the hidden to output weights, and 7168 frozen
+The Hebbian network has 7168 learnable parameters, the hidden to output weights, and 7168 frozen
 ones, the input wiring that is fixed at birth and never learns. An MLP of 28 to H
 to 28 costs 57H + 28. So H = 125 matches the learnable count at 7153 and H = 251
 matches the total at 14335. Both are reported rather than picking whichever

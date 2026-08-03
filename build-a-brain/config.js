@@ -10,7 +10,7 @@ const CONFIG = {
 
   /* ---- 1. WHOSE BRAIN IS THIS? --------------------------- */
   ownerName: 'Yousha',
-  brainName: 'Brian',
+  brainName: 'Neural Network',
 
   /* ---- 2. WHAT IS IT LEARNING? ---------------------------
      Your brief tells you which one is yours. One of:

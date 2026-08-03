@@ -203,7 +203,7 @@ way for the two to be measured differently.
 | MLP, H=125 | 7153 | 0 | 7153 |
 | MLP, H=251 | 14335 | 0 | 14335 |
 
-Brian's input wiring is fixed at birth and never learns, so it has 7168 learnable
+Hebbian's input wiring is fixed at birth and never learns, so it has 7168 learnable
 parameters and 7168 frozen ones. H=125 matches the learnable count and H=251 matches
 the total, so both are reported rather than picking whichever flatters.
 
@@ -211,12 +211,12 @@ the total, so both are reported rather than picking whichever flatters.
 
 | model | score | hue error |
 |---|---|---|
-| Hebbian, 256 cells, one pass | 84.8 | 4.3° |
-| MLP, H=125, one pass | 95.8 | 1.6° |
-| MLP, H=125, 20 epochs | 96.6 | 1.3° |
+| Hebbian, 256 cells, one pass | 85.0 | 4.2° |
+| MLP, H=125, one pass | 95.7 | 1.5° |
+| MLP, H=125, 20 epochs | 96.9 | 1.3° |
 | MLP, H=251, 20 epochs | 96.8 | 1.3° |
 
-**Backpropagation wins on score, as expected.** MLP, H=251, 20 epochs reaches 96.8 against Brian's 84.8.
+**Backpropagation wins on score, as expected.** MLP, H=125, 20 epochs reaches 96.9 against Hebbian's 85.0.
 
 ### The lesion comparison, which is the interesting part
 
@@ -262,4 +262,4 @@ either implementation asked for either of those properties.
 
 Chart: `lesion-comparison.svg`, committed for use on a slide.
 
-Total runtime for this file: 83.7 seconds.
+Total runtime for this file: 89.5 seconds.

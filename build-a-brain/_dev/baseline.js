@@ -8,7 +8,7 @@
    Dev only. Never loaded by the browser.
 
    The comparison is set up to be fair to backprop rather than
-   flattering to Brian:
+   flattering to Hebbian:
 
      same 28 input encoding, from Code.encode()
      same 28 output readout, from Code.decode()
@@ -17,7 +17,7 @@
      same scorer: Brain.prototype.evaluate, borrowed with .call(),
                   so there is literally one scoring implementation
 
-   Only the learning differs. Brian uses one Hebbian line and no error
+   Only the learning differs. Hebbian uses one Hebbian line and no error
    signal. The baseline computes an error and backpropagates it.
    ============================================================ */
 
@@ -188,18 +188,18 @@ const hMatchTotal = Math.round((brianTotal - DIM) / (2 * DIM + 1));
 const countFor = (h) => 2 * DIM * h + h + DIM;
 
 console.log('parameter counts');
-console.log('  Brian    learnable ' + brianLearnable + '  frozen ' + brianFrozen +
+console.log('  Hebbian    learnable ' + brianLearnable + '  frozen ' + brianFrozen +
             '  total ' + brianTotal);
 console.log('  MLP  H=' + hMatchLearnable + '  total ' + countFor(hMatchLearnable) +
-            '  (matched to Brian\'s learnable count)');
+            '  (matched to Hebbian\'s learnable count)');
 console.log('  MLP  H=' + hMatchTotal + '  total ' + countFor(hMatchTotal) +
-            '  (matched to Brian\'s total count)');
+            '  (matched to Hebbian\'s total count)');
 
 /* ============================================================
    Run both
    ============================================================ */
 
-function runBrian(seed) {
+function runHebbian(seed) {
   return withSeed(seed, () => {
     const b = new Brain(Object.assign({}, CONFIG, { relation: RELATION, seed }));
     for (let i = 0; i < TRAIN; i++) b.learn(Probes.example(RELATION));
@@ -247,7 +247,7 @@ const out = { brian: null, mlp: {}, curves: {} };
   const scores = [], hues = [], confs = [];
   const curves = [];
   for (const seed of SEEDS) {
-    const b = runBrian(seed);
+    const b = runHebbian(seed);
     const e = score(b, RELATION);
     scores.push(e.score);
     if (e.hueError != null) hues.push(e.hueError);
@@ -258,7 +258,7 @@ const out = { brian: null, mlp: {}, curves: {} };
   out.curves.brian = curves[0].map((_, i) => ({
     pct: curves[0][i].pct, score: mean(curves.map((c) => c[i].score))
   }));
-  console.log('  Brian                       score ' + f1(out.brian.score) +
+  console.log('  Hebbian                       score ' + f1(out.brian.score) +
               '  hue ' + f1(out.brian.hueErr) + '°');
 }
 
@@ -385,7 +385,7 @@ lines.push('| MLP, H=' + hMatchLearnable + ' | ' + countFor(hMatchLearnable) + '
 lines.push('| MLP, H=' + hMatchTotal + ' | ' + countFor(hMatchTotal) + ' | 0 | ' +
            countFor(hMatchTotal) + ' |');
 lines.push('');
-lines.push('Brian\'s input wiring is fixed at birth and never learns, so it has ' + brianLearnable +
+lines.push('Hebbian\'s input wiring is fixed at birth and never learns, so it has ' + brianLearnable +
            ' learnable');
 lines.push('parameters and ' + brianFrozen + ' frozen ones. H=' + hMatchLearnable +
            ' matches the learnable count and H=' + hMatchTotal + ' matches');
@@ -404,9 +404,9 @@ for (const c of configs) {
 lines.push('');
 lines.push(backpropWins
   ? '**Backpropagation wins on score, as expected.** ' + best.label + ' reaches ' +
-    f1(out.mlp[best.id].score) + ' against Brian\'s ' + f1(out.brian.score) + '.'
+    f1(out.mlp[best.id].score) + ' against Hebbian\'s ' + f1(out.brian.score) + '.'
   : '**Backpropagation did not win on score here, which is not what I expected.** The best ' +
-    'MLP configuration reached ' + f1(out.mlp[best.id].score) + ' against Brian\'s ' +
+    'MLP configuration reached ' + f1(out.mlp[best.id].score) + ' against Hebbian\'s ' +
     f1(out.brian.score) + '. Read the caveat below before using this.');
 lines.push('');
 lines.push('### The lesion comparison, which is the interesting part');
