@@ -74,5 +74,14 @@ const CONFIG = {
 
   /* ---- 10. HOW LONG DOES TRAINING RUN? -------------------
      Number of example colours shown per training run.          */
-  trainingExamples: 4000
+  trainingExamples: 4000,
+
+  /* ---- 11. HOW FAST DOES THE SCREEN GO? ------------------
+     'slow'   one example per frame — you can watch a single
+              synapse being strengthened. About a minute.
+     'normal' the original pace. About fifteen seconds.
+     'fast'   a couple of seconds.
+     You can also change this live with the Speed slider, and
+     the Step x1 button shows exactly one example.             */
+  trainSpeed: 'slow'
 };

@@ -30,8 +30,12 @@
     border: 1px solid var(--edge); border-radius: 999px; padding: 2px 10px;
   }
   main { flex: 1; display: flex; min-height: 0; }
-  #stage { flex: 1; position: relative; min-width: 0; }
-  #net { width: 100%; height: 100%; display: block; }
+  #stage { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  #net { width: 100%; flex: 1; min-height: 0; display: block; cursor: pointer; }
+  #cell {
+    width: 100%; height: 260px; flex-shrink: 0; display: block;
+    border-top: 1px solid var(--edge);
+  }
   aside {
     width: 340px; flex-shrink: 0; border-left: 1px solid var(--edge);
     background: var(--panel); overflow-y: auto; padding: 14px;
@@ -78,16 +82,25 @@
 </header>
 
 <main>
-  <div id="stage"><canvas id="net"></canvas></div>
+  <div id="stage">
+    <canvas id="net"></canvas>
+    <canvas id="cell"></canvas>
+  </div>
 
   <aside>
     <div class="card">
       <h2>Train</h2>
       <div class="row">
         <button id="btnTrain">Train</button>
+        <button id="btnStep" class="ghost">Step ×1</button>
         <button id="btnReset" class="ghost">Forget everything</button>
       </div>
+      <label class="slider" style="margin-top:10px">Speed — <span id="spdLabel">slow</span></label>
+      <input type="range" id="speed" min="0" max="2" step="1" value="0">
       <div class="note" id="progress">Never trained. Every synapse is blank.</div>
+      <div class="note"><b>Step ×1</b> shows the brain a single colour. Watch the
+        spotlighted neuron below: if it wins its competition, a spike runs down
+        the axon and the terminals it strengthens flash white.</div>
     </div>
 
     <div class="card">
@@ -140,6 +153,7 @@
 <script src="brain.js"></script>
 <script src="config.js"></script>
 <script src="viz.js"></script>
+<script src="neuronview.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

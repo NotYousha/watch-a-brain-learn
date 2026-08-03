@@ -159,6 +159,18 @@ const Viz = {
       }
     }
 
+    // The neuron currently in the spotlight below. Click to move it.
+    if (state && state.selected != null && L.hidden[state.selected]) {
+      const p = L.hidden[state.selected];
+      ctx.strokeStyle = th.text;
+      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = 0.9;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 11, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
     // Output neurons.
     for (let i = 0; i < brain.nOut; i++) {
       const act = Math.max(0, brain.out[i]);
@@ -167,6 +179,20 @@ const Viz = {
     }
 
     this.labels(brain, state);
+  },
+
+  /* Which hidden neuron did the student just click on? */
+  hiddenAt(x, y, brain) {
+    if (!this.layout || !this.layout.hidden.length) return -1;
+    let best = -1, bestD = 15 * 15;
+    for (let j = 0; j < brain.nHid; j++) {
+      const p = this.layout.hidden[j];
+      if (!p) continue;
+      const dx = p.x - x, dy = p.y - y;
+      const dd = dx * dx + dy * dy;
+      if (dd < bestD) { bestD = dd; best = j; }
+    }
+    return best;
   },
 
   outPeak(brain) {

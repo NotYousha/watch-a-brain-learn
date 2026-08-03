@@ -23,8 +23,13 @@ const badSrc = srcs.filter(s => !fs.existsSync(D + s));
 console.log('script tags:', srcs.join(' '), '| missing:', badSrc.length ? badSrc.join(', ') : 'none');
 
 /* 3. Actually run it all under a fake DOM. */
+const gradStub = { addColorStop() {} };
 const ctxStub = new Proxy({}, {
-  get: (t, k) => (k in t ? t[k] : () => {}),
+  get: (t, k) => {
+    if (k in t) return t[k];
+    if (k === 'createRadialGradient' || k === 'createLinearGradient') return () => gradStub;
+    return () => {};
+  },
   set: (t, k, v) => { t[k] = v; return true; }
 });
 function makeEl(id) {
@@ -34,7 +39,7 @@ function makeEl(id) {
     classList: { add() {}, remove() {} },
     addEventListener(ev, fn) { (this._h ||= {})[ev] = fn; },
     getContext: () => ctxStub,
-    getBoundingClientRect: () => ({ width: 800, height: 400 })
+    getBoundingClientRect: () => ({ width: 800, height: 400, left: 0, top: 0 })
   };
 }
 const els = {};
@@ -49,10 +54,11 @@ const window = {
 };
 const requestAnimationFrame = (fn) => { rafQueue.push(fn); };
 
-const src = ['colors.js', 'brain.js', 'config.js', 'viz.js', 'app.js'].map(read).join('\n');
+const src = ['colors.js', 'brain.js', 'config.js', 'viz.js', 'neuronview.js', 'app.js']
+  .map(read).join('\n');
 const globals = new Function('document', 'window', 'requestAnimationFrame',
-  src + '\nreturn { Colors, Brain, Viz, CONFIG };')(document, window, requestAnimationFrame);
-const { Colors, Brain, Viz, CONFIG } = globals;
+  src + '\nreturn { Colors, Brain, Viz, NeuronView, CONFIG };')(document, window, requestAnimationFrame);
+const { Colors, Brain, Viz, NeuronView, CONFIG } = globals;
 console.log('page loaded without error');
 console.log('  header:', els.brainName.textContent, '/', els.ownerLine.textContent);
 console.log('  task  :', els.taskLine.textContent.slice(0, 60));
@@ -63,6 +69,15 @@ els.btnTrain._h.click();
 let frames = 0;
 while (rafQueue.length && frames < 4000) { const f = rafQueue.shift(); f(); frames++; }
 console.log('train run: ' + frames + ' frames, ' + els.stSteps.textContent + ' examples, score ' + els.bigScore.innerHTML);
+
+els.btnStep._h.click();
+console.log('step x1:    ' + els.progress.textContent);
+
+els.speed._h.input({ target: { value: 2 } });
+console.log('speed:      ' + els.spdLabel.textContent);
+
+els.net._h.click({ clientX: 400, clientY: 120 });
+console.log('clicked the crowd: spotlight moved without error');
 
 els.btnRandom._h.click();
 console.log('ask random: shown=' + els.swIn.style.background + ' says=' + els.swGot.style.background + ' correct=' + els.swWant.style.background);
