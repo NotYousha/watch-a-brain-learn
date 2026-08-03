@@ -159,9 +159,13 @@ const TourUI = {
       relation: ctx.relationName(),
       lesion: ctx.lesionPercent(),
       selected: ctx.selectedNeuron(),
-      wasTraining: ctx.isTraining()
+      wasTraining: ctx.isTraining(),
+      big: ctx.bigMode ? ctx.bigMode() : false
     };
     ctx.pauseTraining();
+    /* Two stops point at swatches inside the prediction grid, and a
+       hidden element has no rectangle to spotlight. Restored on exit. */
+    if (ctx.setBig) ctx.setBig(false);
     TourUI.live = true;
     TourUI.show(true);
     TourUI.go(0);

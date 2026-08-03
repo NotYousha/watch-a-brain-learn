@@ -745,3 +745,24 @@ body.abmode #controls { display: none; }
 }
 
 #hdr .credit a:hover { color: var(--text-hi); }
+
+/* ---- big mode --------------------------------------------
+   Hand the prediction grid's half of the screen to the network, for
+   showing a room the actual cell and the wires it has built. The
+   crowd view and the single cell both roughly double in width, which
+   is what lengthens the dendrites and spreads the terminals out.
+
+   Note the soma itself does not grow: neuronview.js caps its radius
+   at 46px and is already at that cap in the normal layout. What gets
+   bigger is everything around it. */
+
+body.bigmode #gridPane { display: none; }
+
+body.bigmode #main { grid-template-columns: 1fr; }
+
+/* The single cell carries the fine detail, so it takes most of the
+   extra height. The crowd view keeps a floor, because viz.js sizes its
+   two pools by min(w * 0.16, h * 0.19): starve it of height and the
+   pools collapse into small blobs no matter how wide the pane is. */
+body.bigmode #net  { flex: 1; min-height: 190px; }
+body.bigmode #cell { flex: 2; min-height: 250px; }

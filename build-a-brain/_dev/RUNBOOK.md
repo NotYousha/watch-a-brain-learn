@@ -32,6 +32,11 @@ They have not sat down. You have one idea to land and it is not the architecture
    scores about half. Nothing in the code implements that."
 5. **Drag back to 0.** It fully restores. Let them ask the next question.
 
+If they lean in and want to see the cell itself, press **`b`**. The network takes
+over the whole width and the single neuron gets big enough to read from the back of
+a room. It is safe to press while training is running: the run keeps going and the
+counter keeps counting. Press `b` again to bring the grid back.
+
 If they ask only one thing it is usually "does it actually work" and the answer is
 the grid.
 
@@ -108,6 +113,7 @@ reason, and why it correlates with error across relations it was never tuned on.
 | lesion slider will not restore | drag to 0, or press `r`. The mask is reversible and 0 always fully restores. |
 | relation switch left it looking wrong | it retrains from scratch on switch, so give it a few seconds, or `space` |
 | you dropped into the wrong mode | `esc` gets out of anything. Two `esc` presses gets you to the plain screen. |
+| pressed `b` and want the grid back | `b` again. If you are in A/B, `b` is ignored and says so; press `a` first. |
 | the whole page is wrong | reload. Nothing persists. You lose only the current training run. |
 | the presenter build itself is broken | open `build-a-brain/index.html`. It is the original lab UI, shares the same brain code, and has Train, a lesion slider and a brain map. You can give the talk from it. |
 

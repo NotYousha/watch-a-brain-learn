@@ -66,6 +66,7 @@ projector. Check the bottom row of buttons is still visible after zooming.
 | `s` | show it one example and stop |
 | `r` | reset every learned weight to blank |
 | `l` | focus the lesion slider, then arrow keys to drag it |
+| `b` | bigger: the network takes over the grid's half of the screen. Safe to press mid-run |
 | `t` | the twelve-stop guided tutorial |
 | `a` | A/B mode, two brains with one difference |
 | `1` to `6` | switch which relation it learns, retraining from scratch |
@@ -80,6 +81,8 @@ Inside A/B mode: `space` runs both, `1` to `5` pick the comparison, `esc` leaves
 ### URL shortcuts, for rehearsing
 
 - `presenter.html#train` starts a fast training run on load
+- `presenter.html#big` opens with the network already enlarged, and flags
+  combine with a comma: `#big,train`
 - `presenter.html#tour` opens the tutorial, and `#tour7` opens it at stop 7
 - `presenter.html#ab` opens A/B mode, and `#ab3` opens comparison 3
 

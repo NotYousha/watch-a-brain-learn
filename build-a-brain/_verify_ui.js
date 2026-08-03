@@ -328,6 +328,28 @@ if (presScripts) (async () => {
   if (!pe.pLesion._focused) throw new Error('l did not focus the lesion slider');
   console.log('l:           lesion slider focused');
 
+  /* Big mode must be safe to press mid-run: it resizes canvases and
+     must not touch the trainer, the example count, or the brain. */
+  key(' ');                                   // start a run
+  const runningBefore = pe.pTrain.innerHTML.indexOf('Pause') >= 0;
+  p.pump(60);
+  const stepsBeforeBig = pe.pSteps.textContent;
+  key('b');
+  if (pe.pBig.innerHTML.indexOf('Smaller') < 0) throw new Error('b did not enter big mode');
+  p.pump(60);
+  if (pe.pSteps.textContent === stepsBeforeBig) {
+    throw new Error('training stopped when big mode was toggled');
+  }
+  if (pe.pTrain.innerHTML.indexOf('Pause') < 0 || !runningBefore) {
+    throw new Error('big mode changed the training state');
+  }
+  key('b');
+  if (pe.pBig.innerHTML.indexOf('Bigger') < 0) throw new Error('b did not leave big mode');
+  p.pump(60);
+  console.log('b:           big mode toggles both ways mid-run, ' +
+              stepsBeforeBig + ' -> ' + pe.pSteps.textContent + ' examples, run still going');
+  key(' ');                                   // pause again
+
   /* All six relations must switch, retrain and read out cleanly, not
      just the three that were spot-checked. Keys 1 to 6 in order. */
   for (let i = 1; i <= 6; i++) {

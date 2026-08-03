@@ -840,3 +840,45 @@ mid-sentence, falling back to the old behaviour for anything not listed.
 Worth noting the verifier could not have caught this: it checks that no
 `{placeholder}` survives interpolation, and this one interpolated perfectly well.
 Some things only a screenshot finds.
+
+---
+
+## Added after phase 10: big mode
+
+A `Bigger` button on `b`. The prediction grid's half of the screen goes to the
+network pane, so the crowd view and the single cell roughly double in width. Asked
+for so the actual cell and the wires it has built can be read from the back of a
+room.
+
+Two constraints shaped it.
+
+**It must not disturb a run in progress.** It touches nothing but the two canvas
+sizes: no trainer call, no reset, no lesion reapplication, and the travelling
+spike keeps its phase. Asserted in `_verify_ui.js`, which starts a run, toggles big
+mode both ways mid-run, and fails if the example counter stops advancing or the
+training state changes. Measured 661 to 781 examples across the two toggles.
+
+**No CSS transition on the layout, on purpose.** A canvas keeps its old backing
+resolution until `resize()` is called, so animating the width would show a
+stretched, blurry network for the duration. One crisp frame beats 300ms of soft on
+a projector.
+
+Two things found while building it:
+
+- The crowd view got *worse* on the first attempt. `viz.js` sizes its two pools by
+  `min(w * 0.16, h * 0.19)`, so giving the pane more width and less height
+  collapsed both pools into small blobs. Big mode now puts a 190px floor under the
+  crowd view, which keeps the pools legible while the cell still takes the larger
+  share.
+- The soma does not get bigger, and cannot without editing `neuronview.js`. Its
+  radius is `max(16, min(h * 0.19, 46))` and the normal layout is already at the
+  46px cap. What grows is everything around it: dendrites are about 410px long in
+  big mode, the axon runs the full width, and the terminals spread over most of the
+  height. Left alone because `neuronview.js` ships upstream unchanged on
+  `pr/neuron-view`, but the cap is a one-line change if a bigger cell body is
+  wanted.
+
+Also: the tutorial turns big mode off on entry and restores it on exit, because two
+of its stops point at swatches inside the prediction grid and a hidden element has
+no rectangle to spotlight. Big mode is refused while A/B is up, with a message
+saying to press `a` first.

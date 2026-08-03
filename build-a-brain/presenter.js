@@ -255,7 +255,11 @@
       // which is exactly when a 200-example cadence leaves a stale
       // number on screen. Re-render often early, then settle down.
       const due = brain.stepsTrained < 600 ? 50 : GRID_EVERY;
-      if (sinceGrid >= due) { sinceGrid = 0; renderGrid(); }
+      if (sinceGrid >= due) {
+        sinceGrid = 0;
+        // Skip it while the grid is off screen in big mode.
+        if (!bigMode) renderGrid();
+      }
       $('pSteps').textContent = Shared.fmt.int(brain.stepsTrained);
     },
     onDone: () => {
@@ -570,6 +574,13 @@
     pauseTraining() { trainer.pause(); setTrainLabel(false); },
     snapshot: () => brain.snapshot(),
 
+    /* The tutorial turns big mode off while it runs, because two of
+       its stops point at swatches inside the prediction grid, and a
+       hidden element has no rectangle to spotlight. It is put back on
+       the way out. */
+    bigMode: () => bigMode,
+    setBig,
+
     busy(on) {
       const el = $('tourBusy');
       if (el) el.hidden = !on;
@@ -579,6 +590,7 @@
     restoreState(s) {
       trainer.pause();
       setTrainLabel(false);
+      setBig(!!s.big);
       if (relation !== s.relation) {
         relation = s.relation;
         $('pRelation').value = relation;
@@ -698,6 +710,52 @@
     else AB.open();
   }
 
+  /* ---- big mode -------------------------------------------
+     Hand the prediction grid's half of the screen to the network, so
+     a room can actually see the cell and the wires it has built.
+
+     This deliberately does NOT touch the trainer. Pressing it mid-run
+     keeps the run going, keeps the example counter counting, and
+     leaves the travelling spike's phase alone. All it does is resize
+     two canvases and redraw. The neurons do move, because the crowd
+     view genuinely has more room and re-lays itself out, but nothing
+     about the network or the training is interrupted.
+
+     No CSS transition on the layout on purpose: a canvas keeps its old
+     backing resolution until resize() is called, so an animated width
+     change would show a stretched, blurry network for the duration.
+     One crisp frame beats 300ms of soft. */
+
+  let bigMode = false;
+
+  function setBig(on) {
+    if (on === bigMode) return;
+    bigMode = on;
+    document.body.classList[on ? 'add' : 'remove']('bigmode');
+    $('pBig').setAttribute('aria-pressed', String(on));
+    $('pBig').innerHTML = (on ? 'Smaller' : 'Bigger') + ' <kbd>b</kbd>';
+
+    Viz.resize();
+    NeuronView.resize();
+    // Repaint the grid only when it is back on screen. While it is
+    // hidden the re-render is skipped entirely, which hands its frame
+    // budget to the bigger canvases.
+    if (!on) renderGrid();
+    draw();
+    if (TourUI.live) TourUI.reflow();
+  }
+
+  function toggleBig() {
+    if (AB.live) {
+      say('press a to leave A/B first, then b');
+      return;
+    }
+    setBig(!bigMode);
+    say(bigMode
+      ? 'network enlarged, training untouched'
+      : 'back to the held-out grid');
+  }
+
   /* ---- the help overlay ------------------------------------ */
 
   const KEYMAP = [
@@ -705,6 +763,7 @@
     ['s', 'show it one example and stop'],
     ['r', 'reset every learned weight to blank'],
     ['l', 'focus the lesion slider, then arrow keys'],
+    ['b', 'bigger: give the network the whole screen. Safe mid-run'],
     ['t', 'the guided tutorial'],
     ['a', 'A/B two brains side by side'],
     ['1 … 6', 'switch which relation it learns'],
@@ -739,6 +798,7 @@
   $('pLesion').addEventListener('input', (ev) => onLesionInput(Number(ev.target.value)));
   $('pTour').addEventListener('click', toggleTour);
   $('pAB').addEventListener('click', toggleAB);
+  $('pBig').addEventListener('click', toggleBig);
   $('pHelp').addEventListener('click', () => { $('help').hidden = !$('help').hidden; });
   $('help').addEventListener('click', closeOverlays);
 
@@ -805,6 +865,9 @@
         break;
       case 'a': case 'A':
         toggleAB();
+        break;
+      case 'b': case 'B':
+        toggleBig();
         break;
       case 't': case 'T':
         toggleTour();
@@ -901,7 +964,9 @@
   /* presenter.html#train starts a run on load. Used by the headless
      screenshot checks in _dev, and handy if the laptop is already on
      the projector before the room fills up. */
-  if (typeof location !== 'undefined' && location.hash === '#train') {
+  if (typeof location !== 'undefined' && /(^|[#,+])big/.test(location.hash)) setBig(true);
+
+  if (typeof location !== 'undefined' && /(^|[#,+])train/.test(location.hash)) {
     speedIdx = Shared.SPEEDS.indexOf('fast');
     toggleTrain();
   }
