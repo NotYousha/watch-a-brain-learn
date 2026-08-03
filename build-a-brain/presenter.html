@@ -123,6 +123,34 @@
   </div>
 </div>
 
+<!-- The tutorial spotlight: four rects around the hole rather than a
+     very large box-shadow, which breaks down at the viewport edges,
+     and several of these targets sit in corners. Four rects rather
+     than an SVG mask because the mask composited to nothing in
+     Chromium here and four rects are exactly computable. -->
+<svg id="spot" hidden aria-hidden="true">
+  <rect class="shade" id="spotTop"/>
+  <rect class="shade" id="spotBottom"/>
+  <rect class="shade" id="spotLeft"/>
+  <rect class="shade" id="spotRight"/>
+  <rect id="spotRing" rx="6"/>
+</svg>
+
+<div id="tourCard" hidden role="dialog" aria-label="tutorial">
+  <h3 id="tourTitle"></h3>
+  <p id="tourBody"></p>
+  <pre id="tourCode" class="mono" hidden></pre>
+  <div class="tourfoot">
+    <span class="mono" id="tourProgress">1 / 12</span>
+    <span class="mono" id="tourBusy" hidden>training…</span>
+    <span class="spacer"></span>
+    <button id="tourNarrate" aria-pressed="false">Narrate</button>
+    <button id="tourBack">Back</button>
+    <button id="tourNext">Next</button>
+    <button id="tourQuit">Esc</button>
+  </div>
+</div>
+
 <script src="colors.js"></script>
 <script src="brain.js"></script>
 <script src="config.js"></script>
@@ -130,6 +158,8 @@
 <script src="probes.js"></script>
 <script src="viz.js"></script>
 <script src="neuronview.js"></script>
+<script src="tour.js"></script>
+<script src="tour-ui.js"></script>
 <script src="presenter.js"></script>
 </body>
 </html>

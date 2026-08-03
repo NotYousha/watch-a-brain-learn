@@ -408,3 +408,82 @@ that between them simply do not cover the hue wheel. What was lost is
 representational capacity, not readout. So the fault tolerance in this
 architecture is built in at birth by spreading the answer widely, and it is not
 re-acquirable afterwards. That is a stronger claim than "it heals".
+
+---
+
+## Phase 5: the guided tutorial
+
+New `tour.js`, content only, and `tour-ui.js`, mechanics only. The split is real:
+`tour.js` contains no logic and `tour-ui.js` contains no copy, so the twelve stops
+can be rewritten the night before without touching anything that could break.
+
+### Numbers in the copy are read from the network, not typed in
+
+The brief's draft copy contained figures that are wrong for this build. It said
+each cell hears 2 to 4 inputs; the real spread is 1 to 7. It said a cell was
+ranked 40th of 102; the pools are actually about 107 and 149 and the rank changes
+every frame. It described the task as making colours warmer, which is no longer
+the active relation.
+
+Rather than correcting those by hand and having them drift again, the copy uses
+`{placeholders}` that resolve against the live network at the moment the stop is
+shown. `{firing}` becomes 12, `{inMin}` and `{inMax}` become 1 and 7, `{rank}`
+becomes whatever the spotlighted cell's rank actually is. `_verify_ui.js` walks
+all twelve stops and fails if any placeholder is left unresolved, so the copy
+cannot claim something the network is not doing.
+
+### Two bugs worth recording
+
+**`hidden` does not exist on SVGElement.** The spotlight rendered nothing at all
+on the first two attempts. `show()` was doing `svg.hidden = false`, which is
+correct for an HTMLElement and silently meaningless on an SVG element: it sets a
+JavaScript expando and leaves the `hidden` attribute in place. The card, being a
+div, worked fine, which is what made it look like a rendering or masking problem
+rather than a visibility one. Both now go through `removeAttribute('hidden')`.
+The DOM dump is what found it, not reasoning about it.
+
+**The SVG mask composited to nothing.** The first implementation used a single
+`<mask>` with a white full-viewport rect and a black hole, which is the textbook
+approach and drew nothing in this Chromium. Replaced with four rects around the
+hole plus a thin ring, which the brief also allows. Four rects turned out to be
+better anyway: the geometry is exactly computable, it clamps cleanly when the
+target touches a viewport edge, and several of these targets do sit in corners.
+
+### Pointing at things drawn inside a canvas
+
+Six of the twelve stops point at things that have no element: the input column,
+the dendrites, one dendrite, the membrane arc, the axon terminals, the crowd. Those
+targets are functions returning a viewport rectangle, computed in `TourUI.rect`
+from the canvas rect plus the layout constants used by `viz.js` and
+`neuronview.js`.
+
+That duplicates those constants, which is a genuine coupling and is commented as
+such. The alternative was adding a geometry export to `neuronview.js`, and phase 9
+has to ship `neuronview.js` upstream as a self-contained pull request, so it stays
+clean. If the neuron view layout changes, `TourUI.rect._cellGeom` moves with it.
+
+### State really is restored
+
+Entering snapshots `Who`, `alive`, `fireCount`, `stepsTrained`, the relation, the
+lesion percentage, the spotlighted neuron and whether it was training. Stop 11
+switches to `triadic` and trains 3000 examples, stop 12 switches back to
+`complement` and trains again, and stop 12 drives the lesion slider to 95 per
+cent. Pressing escape at any point puts all of it back. `_verify_ui.js` asserts
+the relation and the example count are identical after exit.
+
+### Narration
+
+Off on load, as specified. Prefers `audio/tour-NN.mp3` if present, falls back to
+the browser's own `speechSynthesis` with the same text, never calls anything over
+the network. No audio files are committed yet, so the fallback is what runs.
+`_dev/render-narration.md` describes regenerating them, including the problem that
+a recording cannot speak a live placeholder and what to do about it.
+
+Captions are not a separate track: the card body is on screen at every stop
+whether audio plays or not, so rewording `tour.js` changes both at once.
+
+### Dev hooks
+
+`presenter.html#tour` opens the tutorial on load and `#tour7` opens it at stop 7,
+which is how the stops were screenshot-checked and is useful for rehearsing one
+stop without clicking through the others.

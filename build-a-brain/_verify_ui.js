@@ -121,12 +121,12 @@ function harness(pageHtml) {
     els, document, window, rafQueue, requestAnimationFrame,
     run(files) {
       const src = files.map(read).join('\n');
-      const names = 'Colors, Brain, Viz, NeuronView, CONFIG, Shared';
-      const extra = files.includes('probes.js') ? ', Probes' : '';
-      const tail = files.includes('tour.js') ? ', Tour' : '';
-      return new Function('document', 'window', 'requestAnimationFrame',
-        src + '\nreturn { ' + names + extra + tail + ' };'
-      )(document, window, requestAnimationFrame);
+      const ret = '\nreturn { Colors, Brain, Viz, NeuronView, CONFIG, Shared,' +
+        ' Probes: typeof Probes !== "undefined" ? Probes : null,' +
+        ' Tour: typeof Tour !== "undefined" ? Tour : null,' +
+        ' TourUI: typeof TourUI !== "undefined" ? TourUI : null };';
+      return new Function('document', 'window', 'requestAnimationFrame', src + ret)(
+        document, window, requestAnimationFrame);
     },
     pump(max) {
       let n = 0;
@@ -363,6 +363,44 @@ if (presScripts) (async () => {
   pe.pLesion._h.input({ target: { value: 0 } });
   await new Promise(r => setTimeout(r, 140));
   console.log('lesion 0%:   alive ' + pe.mAlive.textContent + ', ' + pe.status.textContent);
+
+  /* ---- the tutorial ----------------------------------------
+     Every stop must resolve a target without throwing, must leave no
+     unresolved {placeholder} in its copy, and escaping out must put
+     the brain back exactly as it was found. */
+
+  const T = g.TourUI, Stops = g.Tour;
+  key('1');
+  p.pump(2500);
+  const wasRel = pe.pRelation.value;
+  const wasSteps = pe.pSteps.textContent;
+
+  T.enter();
+  for (let i = 0; i < Stops.stops.length; i++) {
+    await T.go(i);
+    p.pump(60);
+    const stop = Stops.stops[i];
+    const title = pe.tourTitle.textContent;
+    const body = pe.tourBody.textContent;
+    if (!title || !body) throw new Error('stop ' + (i + 1) + ' (' + stop.id + ') has no copy');
+    if (/\{\w+\}/.test(title + body)) {
+      throw new Error('stop ' + (i + 1) + ' (' + stop.id + ') left an unresolved placeholder');
+    }
+    if (pe.tourProgress.textContent !== (i + 1) + ' / ' + Stops.stops.length) {
+      throw new Error('stop ' + (i + 1) + ' progress label is wrong');
+    }
+    console.log('  ' + String(i + 1).padStart(2) + '/' + Stops.stops.length + ' ' +
+                stop.id.padEnd(13) + title.slice(0, 46));
+  }
+  T.exit();
+  if (pe.pRelation.value !== wasRel) throw new Error('exiting the tour changed the relation');
+  if (pe.pSteps.textContent !== wasSteps) {
+    throw new Error('exiting the tour left the brain at ' + pe.pSteps.textContent +
+                    ' examples instead of ' + wasSteps);
+  }
+  if (!pe.tourCard.hidden || !pe.spot.hidden) throw new Error('the tour did not close');
+  console.log('tour: all ' + Stops.stops.length + ' stops resolved, esc restored ' +
+              wasSteps + ' examples on ' + wasRel);
 
   key('r');
   console.log('r reset:     ' + pe.status.textContent);

@@ -491,3 +491,104 @@ a:focus-visible {
   text-overflow: ellipsis;
   max-width: 40ch;
 }
+
+/* ---- the tutorial ---------------------------------------- */
+
+#spot {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 70;
+  cursor: pointer;
+}
+
+#spot[hidden] { display: none; }
+
+.shade {
+  fill: #0B0C0C;
+  fill-opacity: 0.72;
+}
+
+#spotRing {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .shade, #spotRing {
+    transition: x 240ms ease, y 240ms ease, width 240ms ease, height 240ms ease;
+  }
+}
+
+#tourCard {
+  position: fixed;
+  z-index: 80;
+  width: 460px;
+  max-width: calc(100vw - 24px);
+  background: var(--ink-1);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 20px 22px 16px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+}
+
+#tourCard[hidden] { display: none; }
+
+#tourCard h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 10px;
+  color: var(--text-hi);
+  line-height: 1.35;
+}
+
+/* Sixty characters is the readable maximum, and it is also what
+   stops the card growing wider than the thing it points at. */
+#tourCard p {
+  font-size: var(--t-body);
+  line-height: 1.5;
+  color: var(--text-mid);
+  margin: 0;
+  max-width: 60ch;
+}
+
+#tourCode {
+  font-family: var(--mono);
+  font-size: var(--t-meta);
+  color: var(--signal);
+  background: var(--ink-0);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 8px 10px;
+  margin: 12px 0 0;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+#tourCode[hidden] { display: none; }
+
+.tourfoot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+}
+
+.tourfoot .mono {
+  font-size: var(--t-meta);
+  color: var(--text-lo);
+}
+
+#tourBusy { color: var(--signal); }
+#tourBusy[hidden] { display: none; }
+
+.tourfoot button {
+  padding: 7px 14px;
+  font-size: var(--t-meta);
+}
+
+#tourNext { background: var(--signal); color: var(--ink-0); border-color: var(--signal); }

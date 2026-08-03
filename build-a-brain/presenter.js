@@ -82,6 +82,9 @@
     NeuronView.resize();
     sizeVotes();
     refresh();
+    // Every tutorial target is measured live, so the spotlight has to
+    // be recut when anything moves.
+    if (typeof TourUI !== 'undefined') TourUI.reflow();
   });
 
   /* ---- header ---------------------------------------------- */
@@ -101,7 +104,9 @@
       ['seed', String(brain.cfg.seed)]
     ];
     $('pConfig').innerHTML = chips
-      .map(([k, v]) => '<span class="chip" data-k="' + k + '">' + k + ' <b>' + v + '</b></span>')
+      .map(([k, v]) => '<span class="chip"' +
+                       (k === 'wiring' ? ' id="chipWiring"' : '') +
+                       ' data-k="' + k + '">' + k + ' <b>' + v + '</b></span>')
       .join('');
   }
 
@@ -485,6 +490,167 @@
     setTrainLabel(true);
   }
 
+  /* ---- what the tutorial is allowed to do ------------------
+     tour.js and tour-ui.js get this object and nothing else. Keeping
+     the seam narrow is what lets the twelve stops be rewritten
+     without touching any of the logic above.                     */
+
+  function wait(ms) {
+    return new Promise((res) => setTimeout(res, ms));
+  }
+
+  /* Train without animating. Yields once first so the "training"
+     indicator actually paints before the main thread is blocked. */
+  async function trainSilently(n) {
+    await wait(30);
+    for (let i = 0; i < n; i++) brain.learn(Probes.example(relation));
+    NeuronView.invalidate();
+    refresh();
+    renderGrid();
+    lesionCurve = null;
+  }
+
+  async function ensureTrained(min) {
+    if (brain.stepsTrained >= min) return;
+    await trainSilently(min - brain.stepsTrained);
+  }
+
+  /* Switch task and learn it from scratch, without the animated run. */
+  async function retrainOn(name, examples) {
+    if (relation !== name) {
+      relation = name;
+      $('pRelation').value = name;
+      trainer.pause();
+      setTrainLabel(false);
+      brain.reset();
+      applyLesion();
+      lastTarget = null;
+      resetTriple();
+      paintConfig();
+      paintStatic();
+      await trainSilently(examples);
+    } else {
+      await ensureTrained(examples);
+    }
+  }
+
+  /* Apply a lesion immediately, skipping the drag debounce. */
+  function applyLesionNow(pct) {
+    lesionPct = pct;
+    $('pLesion').value = String(pct);
+    $('pLesLabel').textContent = pct;
+    applyLesion();
+    NeuronView.invalidate();
+    const e = refresh();
+    renderGrid();
+    if (!lesionCurve && brain.stepsTrained > 0) computeLesionCurve();
+    drawLesionChart();
+    if (lesionCurve) {
+      setScore('sBefore', lesionCurve[0].score);
+      setScore('sAfter', pct === 0 ? null : e.score);
+    }
+    return e;
+  }
+
+  function reading() {
+    const e = brain.evaluate(relation, 120);
+    const mode = Shared.bimodality(Shared.votes(brain, VOTE_PROBE));
+    restoreDisplay();
+    return { e, mode };
+  }
+
+  const TOUR_TRAIN = 3000;
+
+  const tourCtx = {
+    say,
+    relationName: () => relation,
+    lesionPercent: () => lesionPct,
+    selectedNeuron: () => selected,
+    isTraining: () => trainer.running,
+    pauseTraining() { trainer.pause(); setTrainLabel(false); },
+    snapshot: () => brain.snapshot(),
+
+    busy(on) {
+      const el = $('tourBusy');
+      if (el) el.hidden = !on;
+    },
+
+    /* Put everything back exactly as it was before the tutorial. */
+    restoreState(s) {
+      trainer.pause();
+      setTrainLabel(false);
+      if (relation !== s.relation) {
+        relation = s.relation;
+        $('pRelation').value = relation;
+        paintConfig();
+        paintStatic();
+      }
+      brain.restore(s.brain);
+      selected = s.selected;
+      lesionPct = s.lesion;
+      $('pLesion').value = String(lesionPct);
+      $('pLesLabel').textContent = lesionPct;
+      applyLesion();
+      NeuronView.invalidate();
+      lesionCurve = null;
+      resetTriple();
+      drawLesionChart();
+      refresh();
+      renderGrid();
+    },
+
+    /* ---- the numbers the copy interpolates ---------------- */
+
+    taskPhrase: () => Colors.relations[relation].blurb.replace(/\.$/, ''),
+    firingCount: () => Shared.firingCount(brain),
+    wiring: () => Shared.wiringSpread(brain),
+    drives: () => NeuronView.drives(brain, selected),
+    confidencePercent: () => Math.round(reading().e.confidence * 100),
+    voteSeparation() {
+      const m = reading().mode;
+      return m.sepDeg == null ? 'no' : String(Math.round(m.sepDeg));
+    },
+
+    /* ---- what individual stops do ------------------------- */
+
+    async spotlightBusiestNeuron() {
+      let best = 0;
+      for (let j = 1; j < brain.nHid; j++) {
+        if (brain.inDeg[j] > brain.inDeg[best]) best = j;
+      }
+      selected = best;
+      NeuronView.invalidate();
+      await ensureTrained(600);
+      draw();
+    },
+
+    async stepOnce() {
+      await ensureTrained(600);
+      stepOnce();
+    },
+
+    /* Stop 11: a task with two right answers, so the vote
+       distribution can do the explaining. */
+    async showAmbiguous() {
+      await retrainOn('triadic', TOUR_TRAIN);
+    },
+
+    /* Stop 12: show the degradation rather than describing it. */
+    async breakIt() {
+      await retrainOn('complement', TOUR_TRAIN);
+      applyLesionNow(0);
+      for (const pct of [10, 20, 30, 40]) {
+        applyLesionNow(pct);
+        await wait(260);
+      }
+      await wait(1100);                       // hold at 40, let it land
+      for (const pct of [55, 70, 85, 95]) {
+        applyLesionNow(pct);
+        await wait(300);
+      }
+    }
+  };
+
   /* ---- the help overlay ------------------------------------ */
 
   const KEYMAP = [
@@ -511,6 +677,11 @@
     $('help').hidden = true;
   }
 
+  function toggleTour() {
+    if (TourUI.live) TourUI.exit();
+    else TourUI.enter();
+  }
+
   /* ---- controls -------------------------------------------- */
 
   $('pTrain').addEventListener('click', toggleTrain);
@@ -519,6 +690,7 @@
   $('pRetrain').addEventListener('click', retrainLesioned);
   $('pRelation').addEventListener('change', (ev) => switchRelation(ev.target.value));
   $('pLesion').addEventListener('input', (ev) => onLesionInput(Number(ev.target.value)));
+  $('pTour').addEventListener('click', toggleTour);
   $('pHelp').addEventListener('click', () => { $('help').hidden = !$('help').hidden; });
   $('help').addEventListener('click', closeOverlays);
 
@@ -540,6 +712,14 @@
   window.addEventListener('keydown', (ev) => {
     const tag = ev.target && ev.target.tagName;
     if (tag === 'SELECT') return;
+
+    /* While the tutorial is up it owns the keyboard. Escape is
+       handled inside it and always gets you out. */
+    if (TourUI.live) {
+      if (ev.key === ' ') ev.preventDefault();
+      TourUI.key(ev);
+      return;
+    }
 
     if (ev.key === 'Escape') {
       closeOverlays();
@@ -575,7 +755,7 @@
         say('A/B mode arrives in phase 6');
         break;
       case 't': case 'T':
-        say('the tutorial arrives in phase 5');
+        toggleTour();
         break;
       default:
         if (ev.key >= '1' && ev.key <= '6') {
@@ -611,6 +791,10 @@
         cells[key].push(box.appendChild(document.createElement('i')));
       }
     }
+    // The tutorial points at individual swatches, so give the first of
+    // each row an id rather than relying on a positional selector.
+    cells.in[0].id = 'probe0';
+    cells.got[0].id = 'answer0';
   }
 
   /* The shown row and the correct row only change when the relation
@@ -656,6 +840,7 @@
   buildGrid();
   paintStatic();
   drawLesionChart();
+  TourUI.init(tourCtx);
   refresh();
   renderGrid();
   say('ready. press space to train, ? for keys');
@@ -666,6 +851,14 @@
   if (typeof location !== 'undefined' && location.hash === '#train') {
     speedIdx = Shared.SPEEDS.indexOf('fast');
     toggleTrain();
+  }
+  /* presenter.html#tour opens the tutorial on load, and #tour3 opens
+     it at stop 3. Used by the headless checks, and useful for
+     rehearsing one stop without clicking through the others. */
+  if (typeof location !== 'undefined' && /^#tour\d*$/.test(location.hash)) {
+    const at = parseInt(location.hash.slice(5), 10);
+    TourUI.enter();
+    if (at >= 1) TourUI.go(at - 1);
   }
 
 })();
