@@ -764,3 +764,60 @@ right by coincidence rather than by diagnosis.
 `Original workshop by Kara Codex`, linked to the upstream repository, in the
 presenter header. It is in the header rather than a footer specifically so it
 cannot scroll away, and the header is on screen for the entire talk.
+
+---
+
+## Phase 10: pre-flight
+
+### Resolutions
+
+Captured headless at three sizes, all with `#train` so the network is actually
+running rather than blank:
+
+| target | CSS viewport | result |
+|---|---|---|
+| 1920x1080 | 1920x1080 | no scrollbar, no clipping |
+| 1440x900 | 1440x900 | no scrollbar, no clipping |
+| 1440x900 at 150 per cent zoom | 960x600 | no scrollbar, no clipping, all buttons reachable |
+
+The 150 per cent case was the one worth checking and it is fine. The metric row
+and the two strips absorb the loss of height, and the button row stays on screen.
+
+### Offline
+
+Verified rather than assumed. Two checks.
+
+First, a grep across every shipped file for `https?://`, `//cdn`, `fonts.`,
+`@import`, `fetch(`, `XMLHttpRequest`, `WebSocket`, `new Worker` and `integrity=`.
+One hit: the attribution anchor's `href` in `presenter.html`, which only navigates
+when clicked and loads nothing.
+
+Second, the page was loaded with `--proxy-server=127.0.0.1:1`, which forces every
+network request to a dead port. It trained 165 examples, scored 58, produced a live
+vote readout and rendered the attribution. Nothing degraded.
+
+Fonts are system stacks only. No font file is loaded or committed.
+
+### Assets and size
+
+No binary assets at all. Every tracked file is text: JavaScript, JSON, Markdown,
+HTML, CSS, and one SVG. There is no `audio/` directory, so narration falls back to
+the browser's own speech synthesiser, which is the documented behaviour.
+
+```
+tracked files   472K
+.git            1.4M
+total           2.3M
+```
+
+If narration audio is added later it will be the only binary content in the
+repository. `_dev/render-narration.md` says to keep the set under about 3MB.
+
+### Runbook
+
+`_dev/RUNBOOK.md`: a 60-second path for passers-by, a 6-minute path for people who
+sit down, a table of hostile questions with the honest answer to each including the
+three where the measurements went against the write-up, and a symptom-to-fix table.
+The last row of that table is the important one: if the presenter build fails
+entirely, `index.html` is the original lab UI, shares the same brain code, and has
+enough on it to give the talk from.
