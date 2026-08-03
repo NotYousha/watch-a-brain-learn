@@ -1,0 +1,493 @@
+/* ============================================================
+   presenter.css — the conference shell.
+
+   The subject under test is colour, so the interface has no hue in
+   it anywhere. Every colour you see on this page is either a
+   swatch of data or a neuron drawn by viz.js. The chrome itself is
+   grey, on purpose: any accent hue would sit next to the colours
+   being judged and make the demo lie.
+
+   Reference is a lab instrument readout, not a dashboard.
+   ============================================================ */
+
+:root {
+  --ink-0: #0B0C0C;   /* page */
+  --ink-1: #17191A;   /* panel */
+  --ink-2: #232628;   /* raised */
+  --rule:  #33383B;   /* hairline */
+  --text-hi:  #F2F3F1;
+  --text-mid: #9BA1A3;
+  --text-lo:  #676D70;
+  --signal:   #E8EAE6;   /* live values only */
+
+  --sans: -apple-system, "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Sized for a projector at twelve metres. Nothing below 13px. */
+  --t-metric: 40px;
+  --t-title:  15px;
+  --t-body:   16px;
+  --t-meta:   13px;
+
+  --gap: 12px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;              /* no scrollbar, ever */
+}
+
+body {
+  background: var(--ink-0);
+  color: var(--text-hi);
+  font-family: var(--sans);
+  font-size: var(--t-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Every number is monospace so it stops jittering as it updates.
+   That is functional, not decorative. */
+.mono, .metric, .num {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- the one screen -------------------------------------- */
+
+#shell {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  gap: var(--gap);
+  padding: var(--gap) 16px;
+}
+
+/* ---- header ---------------------------------------------- */
+
+#hdr {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+  min-height: 0;
+}
+
+#hdr h1 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+#hdr .owner {
+  font-size: var(--t-meta);
+  color: var(--text-lo);
+}
+
+.cfgstrip {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
+  align-items: baseline;
+}
+
+.chip {
+  font-family: var(--mono);
+  font-size: var(--t-meta);
+  color: var(--text-mid);
+  background: var(--ink-1);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.chip b {
+  color: var(--text-hi);
+  font-weight: 500;
+}
+
+.chip.live b { color: var(--signal); }
+
+#pCounter {
+  font-family: var(--mono);
+  font-size: var(--t-meta);
+  color: var(--text-mid);
+  white-space: nowrap;
+}
+
+#pCounter b {
+  color: var(--signal);
+  font-weight: 500;
+  font-size: var(--t-body);
+}
+
+/* ---- metric row ------------------------------------------ */
+
+#metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.9fr 1fr;
+  gap: var(--gap);
+  min-height: 0;
+}
+
+.card {
+  background: var(--ink-1);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 10px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.card > label {
+  font-size: var(--t-meta);
+  color: var(--text-mid);
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+  display: block;
+}
+
+.metric {
+  font-size: var(--t-metric);
+  line-height: 1.1;
+  color: var(--signal);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.card .sub {
+  font-size: var(--t-meta);
+  color: var(--text-lo);
+  margin-top: auto;
+}
+
+/* The confidence card carries the vote distribution, which is the
+   most important panel in the talk, so it gets the extra width. */
+
+#confCard { position: relative; }
+
+#confCard .conftop {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+/* Explicit height. A canvas with no CSS height falls back to its
+   150px intrinsic attribute height, which silently inflates the
+   whole metric row. */
+#votes {
+  width: 100%;
+  height: 50px;
+  flex: none;
+  display: block;
+  margin: 6px 0 3px;
+}
+
+#mMode {
+  font-size: var(--t-meta);
+  color: var(--text-mid);
+}
+
+/* ---- main row -------------------------------------------- */
+
+#main {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: var(--gap);
+  min-height: 0;
+}
+
+#gridPane, #cellPane {
+  background: var(--ink-1);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 10px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.panehead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.panehead h2 {
+  font-size: var(--t-title);
+  font-weight: 550;
+  margin: 0;
+  color: var(--text-hi);
+}
+
+.panehead .mono {
+  font-size: var(--t-meta);
+  color: var(--text-mid);
+}
+
+.panehead .mono b {
+  color: var(--signal);
+  font-weight: 500;
+}
+
+.note {
+  font-size: var(--t-meta);
+  color: var(--text-lo);
+  margin: 8px 0 0;
+  line-height: 1.5;
+}
+
+/* ---- the prediction grid: the signature element ---------- */
+
+#grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  flex: 1;
+  justify-content: center;
+}
+
+.gridrow { min-height: 0; }
+
+.gridrow > label {
+  font-size: var(--t-meta);
+  color: var(--text-mid);
+  font-family: var(--mono);
+  display: block;
+  margin-bottom: 3px;
+}
+
+.strip {
+  display: grid;
+  grid-template-columns: repeat(64, 1fr);
+  height: clamp(34px, 5vh, 58px);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.strip i {
+  display: block;
+  background: var(--ink-2);
+}
+
+/* Convergence should read as settling, not flickering. */
+@media (prefers-reduced-motion: no-preference) {
+  .strip i { transition: background-color 300ms linear; }
+}
+
+/* ---- the network pane ------------------------------------ */
+
+#net {
+  width: 100%;
+  flex: 1;
+  min-height: 120px;
+  display: block;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+/* The single-cell view carries a lot of small labels, so it gets the
+   larger share and a floor it cannot be squeezed below. */
+#cell {
+  width: 100%;
+  flex: 1.35;
+  min-height: 200px;
+  display: block;
+  border-top: 1px solid var(--rule);
+  margin-top: 8px;
+  border-radius: 3px;
+}
+
+/* ---- control row: lesion --------------------------------- */
+
+#controls {
+  background: var(--ink-1);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: minmax(240px, 1.2fr) auto auto;
+  gap: 18px;
+  align-items: center;
+  min-height: 0;
+}
+
+.lesionwrap > label {
+  font-size: var(--t-meta);
+  color: var(--text-mid);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.lesionwrap label b {
+  font-family: var(--mono);
+  color: var(--signal);
+  font-weight: 500;
+}
+
+input[type=range] {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--text-mid);   /* grey, not a hue */
+  height: 22px;
+}
+
+#lesionChart { display: block; }
+
+.triple {
+  display: flex;
+  gap: 16px;
+  font-family: var(--mono);
+  font-size: var(--t-meta);
+}
+
+.triple div { text-align: right; }
+
+.triple label {
+  display: block;
+  color: var(--text-mid);
+  font-size: var(--t-meta);
+}
+
+.triple span {
+  color: var(--signal);
+  font-size: 22px;
+}
+
+.triple .pending { color: var(--text-lo); }
+
+/* ---- button row ------------------------------------------ */
+
+#buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+button, select {
+  font-family: var(--sans);
+  font-size: var(--t-body);
+  color: var(--text-hi);
+  background: var(--ink-2);
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  padding: 9px 16px;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+button kbd {
+  font-family: var(--mono);
+  font-size: var(--t-meta);
+  color: var(--text-lo);
+  margin-left: 8px;
+}
+
+button[aria-pressed="true"] {
+  background: var(--signal);
+  color: var(--ink-0);
+  border-color: var(--signal);
+}
+
+button[aria-pressed="true"] kbd { color: var(--ink-0); opacity: 0.65; }
+
+button:disabled { opacity: 0.4; cursor: default; }
+
+select { padding: 9px 12px; }
+
+/* He will be driving this without looking at the trackpad, so the
+   focus ring has to be unmissable and must never be suppressed. */
+:focus { outline: none; }
+:focus-visible,
+input[type=range]:focus,
+button:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+.forced-focus {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+.spacer { flex: 1; }
+
+/* ---- overlays -------------------------------------------- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 12, 12, 0.88);
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 40px;
+}
+
+.overlay[hidden] { display: none; }
+
+.sheet {
+  background: var(--ink-1);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 26px 30px;
+  max-width: 720px;
+  width: 100%;
+}
+
+.sheet h2 {
+  font-size: 18px;
+  margin: 0 0 16px;
+  font-weight: 550;
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 18px;
+  align-items: baseline;
+}
+
+.keys kbd {
+  font-family: var(--mono);
+  font-size: var(--t-body);
+  background: var(--ink-2);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 2px 9px;
+  color: var(--signal);
+  justify-self: start;
+  white-space: nowrap;
+}
+
+.keys span { color: var(--text-mid); font-size: var(--t-body); }
+
+.sheet .note { margin-top: 18px; }
+
+/* ---- status line ----------------------------------------- */
+
+#status {
+  font-family: var(--mono);
+  font-size: var(--t-meta);
+  color: var(--text-mid);
+  margin-left: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 40ch;
+}

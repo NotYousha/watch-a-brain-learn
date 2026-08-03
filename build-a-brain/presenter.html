@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presenter</title>
+<link rel="stylesheet" href="presenter.css">
+</head>
+<body>
+
+<div id="shell">
+
+  <header id="hdr">
+    <h1 id="pBrainName">Brain</h1>
+    <span class="owner" id="pOwner"></span>
+    <div class="cfgstrip" id="pConfig"></div>
+    <div id="pCounter"><b id="pSteps">0</b> examples seen</div>
+  </header>
+
+  <section id="metrics">
+    <div class="card" id="scoreCard">
+      <label for="mScore">score</label>
+      <div class="metric" id="mScore">&mdash;</div>
+      <div class="sub">out of 100, on colours it has never seen</div>
+    </div>
+
+    <div class="card" id="hueCard">
+      <label>hue error</label>
+      <div class="metric" id="mHue">&mdash;</div>
+      <div class="sub">mean, degrees off the correct answer</div>
+    </div>
+
+    <div class="card" id="confCard">
+      <div class="conftop">
+        <div>
+          <label>confidence</label>
+          <div class="metric" id="mConf">&mdash;</div>
+        </div>
+        <div class="sub" style="margin:0" id="confHint">
+          the 28 output neurons, and how loudly each is voting
+        </div>
+      </div>
+      <canvas id="votes"></canvas>
+      <div class="mono" id="mMode">&mdash;</div>
+    </div>
+
+    <div class="card" id="aliveCard">
+      <label>neurons alive</label>
+      <div class="metric" id="mAlive">&mdash;</div>
+      <div class="sub" id="mFiring">&mdash;</div>
+    </div>
+  </section>
+
+  <main id="main">
+
+    <section id="gridPane">
+      <div class="panehead">
+        <h2>64 held-out colours</h2>
+        <div class="mono" id="gridErr">&mdash;</div>
+      </div>
+      <div id="grid">
+        <div class="gridrow"><label>shown</label><div class="strip" id="stripIn"></div></div>
+        <div class="gridrow"><label id="labSays">it answers</label><div class="strip" id="stripGot"></div></div>
+        <div class="gridrow"><label>correct</label><div class="strip" id="stripWant"></div></div>
+      </div>
+      <p class="note" id="gridNote">
+        These 64 colours are held out: the training stream never shows them.
+        The middle row is the network's answer. Watch it settle onto the bottom row.
+      </p>
+    </section>
+
+    <section id="cellPane">
+      <div class="panehead">
+        <h2>the network</h2>
+        <div class="mono" id="fireNote">&mdash;</div>
+      </div>
+      <canvas id="net"></canvas>
+      <canvas id="cell"></canvas>
+    </section>
+
+  </main>
+
+  <section id="controls">
+    <div class="lesionwrap">
+      <label for="pLesion">kill <b id="pLesLabel">0</b>% of the neurons</label>
+      <input type="range" id="pLesion" min="0" max="95" step="5" value="0">
+    </div>
+    <svg id="lesionChart" width="300" height="72" role="img"
+         aria-label="score against percentage of neurons killed"></svg>
+    <div class="triple">
+      <div><label>before</label><span id="sBefore" class="pending">&mdash;</span></div>
+      <div><label>lesioned</label><span id="sAfter" class="pending">&mdash;</span></div>
+      <div><label>retrained</label><span id="sRetrain" class="pending">&mdash;</span></div>
+    </div>
+  </section>
+
+  <nav id="buttons">
+    <button id="pTrain">Train <kbd>space</kbd></button>
+    <button id="pStep">Step &times;1 <kbd>s</kbd></button>
+    <button id="pReset">Reset weights <kbd>r</kbd></button>
+    <button id="pRetrain">Retrain lesioned</button>
+    <select id="pRelation" aria-label="which relation to learn"></select>
+    <span class="spacer"></span>
+    <span id="status"></span>
+    <button id="pAB" aria-pressed="false">A/B <kbd>a</kbd></button>
+    <button id="pTour">Tutorial <kbd>t</kbd></button>
+    <button id="pHelp" aria-label="keyboard shortcuts">? </button>
+  </nav>
+
+</div>
+
+<div id="help" class="overlay" hidden>
+  <div class="sheet">
+    <h2>Keyboard</h2>
+    <div class="keys" id="keyList"></div>
+    <p class="note">
+      Everything on screen is read straight out of the running network.
+      Nothing is a mock-up and nothing is pre-recorded.
+    </p>
+  </div>
+</div>
+
+<script src="colors.js"></script>
+<script src="brain.js"></script>
+<script src="config.js"></script>
+<script src="shared.js"></script>
+<script src="viz.js"></script>
+<script src="neuronview.js"></script>
+<script src="presenter.js"></script>
+</body>
+</html>

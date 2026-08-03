@@ -34,9 +34,6 @@
   });
 
   let history = [];
-  let training = false;
-  let remaining = 0;
-  let frame = 0;
   let lesionPct = 0;
   let lastTarget = null;
 
@@ -56,26 +53,22 @@
 
   /* ---- how fast to train ----------------------------------
      Slow is one example per frame, so you can actually watch a
-     single Hebbian update happen. */
+     single Hebbian update happen. The speed table and the loop
+     itself live in shared.js, because the presenter shell needs
+     exactly the same pacing. */
 
-  const SPEEDS = ['slow', 'normal', 'fast'];
+  const SPEEDS = Shared.SPEEDS;
   let speedIdx = Math.max(0, SPEEDS.indexOf(CONFIG.trainSpeed || 'slow'));
-
-  function perFrame() {
-    if (SPEEDS[speedIdx] === 'slow') return 1;
-    if (SPEEDS[speedIdx] === 'fast') return Math.max(1, Math.round(CONFIG.trainingExamples / 120));
-    return Math.max(1, Math.round(CONFIG.trainingExamples / 900));
-  }
 
   /* ---- readouts ------------------------------------------- */
 
   function refreshStats() {
     const e = brain.evaluate(CONFIG.relation, 80);
-    $('bigScore').innerHTML = e.score + '<small> / 100</small>';
-    $('stHue').textContent = e.hueError === null ? 'n/a' : e.hueError.toFixed(1) + '°';
-    $('stConf').textContent = (e.confidence * 100).toFixed(0) + '%';
-    $('stSteps').textContent = brain.stepsTrained.toLocaleString();
-    $('stAlive').textContent = brain.aliveCount() + ' / ' + brain.nHid;
+    $('bigScore').innerHTML = Shared.fmt.score(e) + '<small> / 100</small>';
+    $('stHue').textContent = Shared.fmt.hue(e);
+    $('stConf').textContent = Shared.fmt.conf(e);
+    $('stSteps').textContent = Shared.fmt.int(brain.stepsTrained);
+    $('stAlive').textContent = Shared.fmt.alive(brain);
     return e;
   }
 
@@ -96,61 +89,51 @@
 
   /* ---- the training loop ----------------------------------
      We train a few examples per animation frame rather than all
-     at once, so that you can actually watch the synapses grow. */
+     at once, so that you can actually watch the synapses grow.
+     The loop itself lives in shared.js, because the presenter
+     shell has to run the identical one. */
 
-  function loop() {
-    if (!training) return;
-
-    const n = perFrame();
-    for (let i = 0; i < n && remaining > 0; i++) {
-      const ex = Colors.makeExample(CONFIG.relation);
+  const trainer = new Shared.Trainer({
+    total: CONFIG.trainingExamples,
+    speedIdx: () => speedIdx,
+    example: () => Colors.makeExample(CONFIG.relation),
+    onExample: (ex) => {
       brain.learn(ex);
       lastTarget = Code.encode(ex.target);
-      remaining--;
-    }
-
-    redraw();
-
-    if (frame % 20 === 0) {
-      const e = refreshStats();
-      history.push(e.score);
-      if (history.length > 220) history.shift();
-      refreshPanels();
-    }
-    frame++;
-
-    if (remaining <= 0) {
-      training = false;
+    },
+    onFrame: (t) => {
+      redraw();
+      if (t.frame % 20 === 0) {
+        const e = refreshStats();
+        history.push(e.score);
+        if (history.length > 220) history.shift();
+        refreshPanels();
+      }
+      $('progress').textContent =
+        'Training… ' + (CONFIG.trainingExamples - t.remaining).toLocaleString() +
+        ' / ' + CONFIG.trainingExamples.toLocaleString();
+    },
+    onDone: () => {
       $('btnTrain').textContent = 'Train again';
       $('btnTrain').disabled = false;
       $('progress').textContent =
         'Trained on ' + brain.stepsTrained.toLocaleString() + ' example colours.';
       refreshStats();
       refreshPanels();
-      return;
     }
-
-    $('progress').textContent =
-      'Training… ' + (CONFIG.trainingExamples - remaining).toLocaleString() +
-      ' / ' + CONFIG.trainingExamples.toLocaleString();
-
-    requestAnimationFrame(loop);
-  }
+  });
 
   /* ---- controls ------------------------------------------- */
 
   $('btnTrain').addEventListener('click', () => {
-    if (training) return;
-    training = true;
-    remaining = CONFIG.trainingExamples;
-    frame = 0;
+    if (trainer.running) return;
     $('btnTrain').disabled = true;
     $('btnTrain').textContent = 'Training…';
-    requestAnimationFrame(loop);
+    trainer.start(CONFIG.trainingExamples);
   });
 
   $('btnReset').addEventListener('click', () => {
-    training = false;
+    trainer.pause();
     brain.reset();
     applyLesion();
     history = [];

@@ -16,7 +16,7 @@ const CONFIG = {
      Your brief tells you which one is yours. One of:
        'complement' 'analogous' 'triadic'
        'split-complement' 'warmer' 'luminance'          */
-  relation: 'warmer',
+  relation: 'complement',
 
   /* ---- 3. HOW BIG IS IT? ---------------------------------
      How many neurons in the thinking layer.

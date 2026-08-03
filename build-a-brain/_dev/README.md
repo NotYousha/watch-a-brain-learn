@@ -147,3 +147,83 @@ Phase 7 budget has to be built from. Around 300 distinct training runs are
 needed if experiment 7 reuses experiment 1's runs rather than repeating them,
 which lands the suite near 2 minutes single threaded and inside the target. If
 experiment 7 trains its own brains the suite roughly doubles.
+
+---
+
+## Phase 1: presenter shell
+
+New: `presenter.html`, `presenter.css`, `presenter.js`, `shared.js`.
+Changed: `app.js` now uses `shared.js`, `index.html` loads it, `_verify_ui.js`
+rewritten, `brain.js` gained three additions, `config.js` relation switched.
+
+### What went into shared.js and why
+
+`app.js` and `presenter.js` genuinely share the pacing table, the training loop,
+and the number formatting. All three moved into `shared.js` and both entry points
+call it, so the presenter is not a copy of the lab UI. `Shared.Trainer` owns
+pause and resume and calls back into whichever UI is driving it. The lab UI's
+frame behaviour is unchanged: still one example per frame on slow, still a stats
+refresh every twenty frames.
+
+Also in `shared.js`: the output vote distribution, the one hump versus two humps
+detection, and a reader for how many inputs each cell actually ended up with.
+Those are needed by the presenter, by A/B mode in phase 6, and by nothing in the
+lab UI.
+
+### Additions to brain.js
+
+Three, all permitted by the brief, none touching the learning rule.
+
+- `lesionOrder(seed)` and `lesionTo(fraction, seed)`. One fixed kill order from
+  an independent generator, then take a prefix of it. Repeatable, nested, and
+  fully reversible, which the built-in `lesion()` is not. See phase 0 finding 1.
+- `snapshot()` and `restore(s)`. Copies `Who`, `alive`, `fireCount` and
+  `stepsTrained`. Deliberately does not touch `Wih`, which is fixed at birth and
+  never learns. The tutorial in phase 5 needs this to put the brain back after
+  training silently to make a point.
+
+### Colourless chrome without editing viz.js
+
+The brief says reuse `viz.js` unchanged, and also says no hue anywhere in the
+chrome. The shipped dark theme is blue-black, which is a hue. Resolved by
+assigning a neutral palette onto `Viz.theme` and `NeuronView.theme` from
+`presenter.js` after `init()`, which needs no edit to either file.
+
+Neuron fill colours are left alone on purpose. Pale blue for a colour-pathway
+cell, amber for a brightness-pathway cell, and the green membrane arc are data,
+not decoration: they say which pathway a cell belongs to and whether it just
+fired. Tour stop 6 refers to the green arc by name.
+
+### Surprises
+
+- A `<canvas>` with `width: 100%` and no CSS height falls back to its 150px
+  intrinsic attribute height. That silently inflated the whole metric row to
+  about 440px on the first screenshot. Canvases in this build get an explicit
+  CSS height.
+- The fake DOM in `_verify_ui.js` defaulted every element's `hidden` to false, so
+  the shortcuts overlay looked permanently open and the keydown handler, which
+  correctly ignores keys while an overlay is up, appeared to be broken. The
+  harness now reads the `hidden` attribute out of the markup.
+- `_verify_ui.js` was rewritten around a reusable harness so each page gets its
+  own fake DOM. Booting both pages into one scope had them fight over the `net`
+  and `cell` canvas ids and over the `Viz` singleton. This is part of phase 9's
+  work brought forward, because it protects every phase after this one.
+- The header wiring chip reads real in-degrees: each cell hears 1 to 7 of 28, not
+  the 2 to 4 the brief's tour copy assumes. Tour stop 8 must read the real
+  numbers rather than hard-code them.
+
+### Screenshots
+
+Captured headless with the Playwright Chromium already on this machine at
+`~/.cache/ms-playwright/chromium-1228/chrome-linux64/chrome`. No scrollbar and no
+clipping at either 1920x1080 or 1440x900. `presenter.html#train` starts a fast
+run on load, which is what makes a useful screenshot possible.
+
+### Relation changed to complement
+
+Asked for during this phase. `warmer` drags every colour toward orange and lifts
+saturation, so the answer row reads as a set of shades rather than a
+transformation, which is a fair complaint. `CONFIG.relation` is now `complement`,
+the clean opposite-on-the-wheel flip. Only the config value changed. No relation
+definition in `colors.js` was touched, and all six are still reachable live on
+keys 1 to 6.

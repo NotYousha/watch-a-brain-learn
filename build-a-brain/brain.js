@@ -349,6 +349,74 @@ class Brain {
 
   heal() { this.alive.fill(1); }
 
+  /* ---- a repeatable lesion mask ---------------------------
+     lesion() above shuffles using this.rng, which is a stateful
+     closure that is never rewound, so asking for 40 percent twice
+     kills two different sets of cells. That is fine for a student
+     poking at it once. It is wrong for a slider you drag back and
+     forth in front of a room.
+
+     So: build ONE kill order from its own independent generator,
+     and take a prefix of it. Same seed and same percentage always
+     kills the same cells, 40 percent is always a superset of 20
+     percent, and dragging back to zero restores exactly.
+
+     Nothing here changes the learning rule, the competition, or
+     the readout. It only writes this.alive, the same flag that
+     lesion() and heal() already write.                         */
+
+  lesionOrder(seed) {
+    if (this._lesOrder && this._lesSeed === seed && this._lesOrder.length === this.nHid) {
+      return this._lesOrder;
+    }
+    const rng = Brain.makeRng(seed);
+    const order = new Int32Array(this.nHid);
+    for (let j = 0; j < this.nHid; j++) order[j] = j;
+    for (let i = this.nHid - 1; i > 0; i--) {
+      const r = Math.floor(rng() * (i + 1));
+      const t = order[i]; order[i] = order[r]; order[r] = t;
+    }
+    this._lesOrder = order;
+    this._lesSeed = seed;
+    return order;
+  }
+
+  /* Kill exactly this fraction, reversibly and repeatably. */
+  lesionTo(fraction, seed) {
+    const order = this.lesionOrder(seed == null ? 1 : seed);
+    const kill = Math.round(this.nHid * fraction);
+    this.alive.fill(1);
+    for (let i = 0; i < kill && i < order.length; i++) this.alive[order[i]] = 0;
+    return kill;
+  }
+
+  /* ---- snapshot and restore -------------------------------
+     Everything training changes, and nothing it does not. The fixed
+     input wiring is left out on purpose: it is built once at birth
+     and never learns, so there is nothing to save.
+
+     The tutorial uses this so that walking into it, training
+     silently to make a point, and pressing escape leaves the brain
+     exactly as the presenter left it.                           */
+
+  snapshot() {
+    return {
+      Who: Float64Array.from(this.Who),
+      alive: Float64Array.from(this.alive),
+      fireCount: Float64Array.from(this.fireCount),
+      stepsTrained: this.stepsTrained
+    };
+  }
+
+  restore(s) {
+    if (!s || s.Who.length !== this.Who.length) return false;
+    this.Who.set(s.Who);
+    this.alive.set(s.alive);
+    this.fireCount.set(s.fireCount);
+    this.stepsTrained = s.stepsTrained;
+    return true;
+  }
+
   aliveCount() {
     let n = 0;
     for (let j = 0; j < this.nHid; j++) n += this.alive[j];

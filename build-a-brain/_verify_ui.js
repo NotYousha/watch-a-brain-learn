@@ -1,74 +1,159 @@
 /* Dev-only. Runs the browser code under a fake DOM to catch
-   reference errors and missing element IDs.  node _verify_ui.js */
+   reference errors and missing element IDs.  node _verify_ui.js
+
+   Two pages are checked: index.html, the student lab UI, and
+   presenter.html, the conference shell. Each gets its own fake DOM,
+   because Viz and NeuronView are singletons and booting both pages
+   into one scope would have them fight over the same canvases. */
+
 const fs = require('fs');
 const D = __dirname + '/';
 const read = (f) => fs.readFileSync(D + f, 'utf8');
 
-const html = read('index.html');
-const app = read('app.js');
+/* ---- 1. static consistency -------------------------------
+   Every element id referenced by ANY script a page loads must exist
+   in that page. Scanning app.js on its own stopped being enough the
+   moment shared logic moved into shared.js, and it would miss
+   presenter.js entirely. */
 
-/* 1. Every getElementById in app.js must exist in index.html */
-const htmlIds = new Set([...html.matchAll(/id="([^"]+)"/g)].map(m => m[1]));
-const wanted = [
-  ...[...app.matchAll(/getElementById\(['"]([^'"]+)['"]\)/g)].map(m => m[1]),
-  ...[...app.matchAll(/\$\(['"]([^'"]+)['"]\)/g)].map(m => m[1])   // the $() helper
-];
-const missing = [...new Set(wanted)].filter(id => !htmlIds.has(id));
-console.log('element ids referenced:', new Set(wanted).size,
-            '| missing from index.html:', missing.length ? missing.join(', ') : 'none');
+function idsReferencedBy(files) {
+  const out = [];
+  for (const f of files) {
+    const s = read(f);
+    out.push(...[...s.matchAll(/getElementById\(['"]([^'"]+)['"]\)/g)].map(m => m[1]));
+    out.push(...[...s.matchAll(/\$\(['"]([^'"]+)['"]\)/g)].map(m => m[1]));   // the $() helper
+  }
+  return out;
+}
 
-/* 2. Every <script src> must exist on disk */
-const srcs = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1]);
-const badSrc = srcs.filter(s => !fs.existsSync(D + s));
-console.log('script tags:', srcs.join(' '), '| missing:', badSrc.length ? badSrc.join(', ') : 'none');
+function checkPage(htmlFile) {
+  const page = read(htmlFile);
+  const ids = new Set([...page.matchAll(/id="([^"]+)"/g)].map(m => m[1]));
+  const srcs = [...page.matchAll(/<script src="([^"]+)"/g)].map(m => m[1]);
+  const badSrc = srcs.filter(s => !fs.existsSync(D + s));
+  const wanted = new Set(idsReferencedBy(srcs.filter(s => fs.existsSync(D + s))));
+  const missing = [...wanted].filter(id => !ids.has(id));
+  console.log(htmlFile.padEnd(15),
+              String(wanted.size).padStart(3) + ' ids across ' + srcs.length + ' scripts',
+              '| missing ids:', missing.length ? missing.join(', ') : 'none',
+              '| missing scripts:', badSrc.length ? badSrc.join(', ') : 'none');
+  if (missing.length || badSrc.length) throw new Error(htmlFile + ' is inconsistent');
+  return srcs;
+}
 
-/* 3. Actually run it all under a fake DOM. */
+const labScripts = checkPage('index.html');
+const presScripts = fs.existsSync(D + 'presenter.html') ? checkPage('presenter.html') : null;
+
+/* ---- 2. a fake DOM --------------------------------------- */
+
 const gradStub = { addColorStop() {} };
 const ctxStub = new Proxy({}, {
   get: (t, k) => {
     if (k in t) return t[k];
     if (k === 'createRadialGradient' || k === 'createLinearGradient') return () => gradStub;
+    if (k === 'measureText') return () => ({ width: 20 });
     return () => {};
   },
   set: (t, k, v) => { t[k] = v; return true; }
 });
-function makeEl(id) {
+
+/* Which ids carry the hidden attribute in the markup. Without this
+   the fake DOM reports every overlay as already open, and a keydown
+   handler that ignores keys while an overlay is up looks broken. */
+function hiddenIds(html) {
+  const set = new Set();
+  for (const m of html.matchAll(/<[^>]*\sid="([^"]+)"[^>]*>/g)) {
+    if (/\shidden(\s|=|>|\/)/.test(m[0])) set.add(m[1]);
+  }
+  return set;
+}
+
+function harness(pageHtml) {
+  const els = {};
+  const rafQueue = [];
+  const startsHidden = hiddenIds(pageHtml || '');
+
+  function makeEl(id) {
+    return {
+      id, style: {}, textContent: '', innerHTML: '', value: '#e03c3c',
+      hidden: startsHidden.has(id), width: 800, height: 400, tagName: 'DIV',
+      children: [], dataset: {},
+      classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
+      setAttribute() {}, removeAttribute() {}, getAttribute: () => null,
+      focus() { this._focused = true; }, blur() { this._focused = false; },
+      appendChild(c) { this.children.push(c); return c; },
+      querySelector: () => null,
+      querySelectorAll: () => [],
+      addEventListener(ev, fn) { (this._h ||= {})[ev] = fn; },
+      removeEventListener() {},
+      getContext: () => ctxStub,
+      getBoundingClientRect: () => ({ width: 800, height: 400, left: 0, top: 0, right: 800, bottom: 400 })
+    };
+  }
+
+  const document = {
+    body: {
+      classList: { add() {}, remove() {} },
+      appendChild(c) { return c; },
+      set innerHTML(v) { throw new Error('page bailed out: ' + v.slice(0, 140)); }
+    },
+    documentElement: makeEl('html'),
+    getElementById: (id) => (els[id] ||= makeEl(id)),
+    createElement: (tag) => { const e = makeEl('new-' + tag); e.tagName = tag.toUpperCase(); return e; },
+    createElementNS: (ns, tag) => { const e = makeEl('new-' + tag); e.tagName = tag; return e; },
+    querySelector: (sel) => els[String(sel).replace(/^#/, '')] || null,
+    querySelectorAll: () => [],
+    addEventListener(ev, fn) { (this._h ||= {})[ev] = fn; }
+  };
+
+  const window = {
+    devicePixelRatio: 2,
+    innerWidth: 1920, innerHeight: 1080,
+    addEventListener: (ev, fn) => { window['_' + ev] = fn; },
+    removeEventListener: () => {},
+    getComputedStyle: () => ({ getPropertyValue: () => '' }),
+    matchMedia: () => ({ matches: false, addEventListener() {} })
+  };
+
+  const requestAnimationFrame = (fn) => { rafQueue.push(fn); };
+
   return {
-    id, style: {}, textContent: '', innerHTML: '', value: '#e03c3c',
-    width: 800, height: 400,
-    classList: { add() {}, remove() {} },
-    addEventListener(ev, fn) { (this._h ||= {})[ev] = fn; },
-    getContext: () => ctxStub,
-    getBoundingClientRect: () => ({ width: 800, height: 400, left: 0, top: 0 })
+    els, document, window, rafQueue, requestAnimationFrame,
+    run(files) {
+      const src = files.map(read).join('\n');
+      const names = 'Colors, Brain, Viz, NeuronView, CONFIG, Shared';
+      const extra = files.includes('probes.js') ? ', Probes' : '';
+      const tail = files.includes('tour.js') ? ', Tour' : '';
+      return new Function('document', 'window', 'requestAnimationFrame',
+        src + '\nreturn { ' + names + extra + tail + ' };'
+      )(document, window, requestAnimationFrame);
+    },
+    pump(max) {
+      let n = 0;
+      while (rafQueue.length && n < max) { rafQueue.shift()(); n++; }
+      return n;
+    }
   };
 }
-const els = {};
-const document = {
-  body: { classList: { add() {} }, set innerHTML(v) { throw new Error('app.js bailed out: ' + v.slice(0, 120)); } },
-  getElementById: (id) => (els[id] ||= makeEl(id))
-};
-let rafQueue = [];
-const window = {
-  devicePixelRatio: 2,
-  addEventListener: (ev, fn) => { window['_' + ev] = fn; }
-};
-const requestAnimationFrame = (fn) => { rafQueue.push(fn); };
 
-const src = ['colors.js', 'brain.js', 'config.js', 'viz.js', 'neuronview.js', 'app.js']
-  .map(read).join('\n');
-const globals = new Function('document', 'window', 'requestAnimationFrame',
-  src + '\nreturn { Colors, Brain, Viz, NeuronView, CONFIG };')(document, window, requestAnimationFrame);
+/* ---- 3. the student lab UI ------------------------------- */
+
+console.log('\n-- index.html, the student lab --');
+
+const lab = harness(read('index.html'));
+const globals = lab.run(labScripts);
 const { Colors, Brain, Viz, NeuronView, CONFIG } = globals;
+const els = lab.els;
+
 console.log('page loaded without error');
 console.log('  header:', els.brainName.textContent, '/', els.ownerLine.textContent);
 console.log('  task  :', els.taskLine.textContent.slice(0, 60));
 console.log('  score :', els.bigScore.innerHTML);
 
-/* 4. Drive the controls the way a student would. */
 els.btnTrain._h.click();
-let frames = 0;
-while (rafQueue.length && frames < 4000) { const f = rafQueue.shift(); f(); frames++; }
-console.log('train run: ' + frames + ' frames, ' + els.stSteps.textContent + ' examples, score ' + els.bigScore.innerHTML);
+const frames = lab.pump(4000);
+console.log('train run: ' + frames + ' frames, ' + els.stSteps.textContent +
+            ' examples, score ' + els.bigScore.innerHTML);
 
 els.btnStep._h.click();
 console.log('step x1:    ' + els.progress.textContent);
@@ -80,7 +165,9 @@ els.net._h.click({ clientX: 400, clientY: 120 });
 console.log('clicked the crowd: spotlight moved without error');
 
 els.btnRandom._h.click();
-console.log('ask random: shown=' + els.swIn.style.background + ' says=' + els.swGot.style.background + ' correct=' + els.swWant.style.background);
+console.log('ask random: shown=' + els.swIn.style.background +
+            ' says=' + els.swGot.style.background +
+            ' correct=' + els.swWant.style.background);
 
 els.pick.value = '#3ca0e0';
 els.btnAsk._h.click();
@@ -94,15 +181,101 @@ console.log('healed:     alive ' + els.stAlive.textContent + ', score ' + els.bi
 els.btnReset._h.click();
 console.log('reset:      ' + els.progress.textContent + ' score ' + els.bigScore.innerHTML);
 
-window._resize();
+lab.window._resize();
 console.log('resize handled');
 
-/* 5. Every relation must load and train through the same path. */
+/* ---- 4. every relation, through the same path ------------ */
+
 for (const name of Colors.relationNames) {
   const b = new Brain(Object.assign({}, CONFIG, { relation: name }));
   for (let i = 0; i < 500; i++) b.learn(Colors.makeExample(name));
   const e = b.evaluate(name, 60);
   if (!isFinite(e.score) || !isFinite(e.rgbError)) throw new Error('bad numbers for ' + name);
-  Viz.drawMap(makeEl('m'), b, name);
+  Viz.drawMap({ getContext: () => ctxStub, getBoundingClientRect: () => ({ width: 300, height: 80 }) }, b, name);
 }
 console.log('all ' + Colors.relationNames.length + ' relations train + render cleanly');
+
+/* ---- 5. the repeatable lesion mask ----------------------- */
+
+{
+  const b = new Brain(CONFIG);
+  for (let i = 0; i < 300; i++) b.learn(Colors.makeExample(CONFIG.relation));
+  const sig = () => Array.from(b.alive).join('');
+  b.lesionTo(0.4, 20260803); const a1 = sig();
+  b.lesionTo(0.0, 20260803);
+  b.lesionTo(0.4, 20260803); const a2 = sig();
+  if (a1 !== a2) throw new Error('lesionTo is not repeatable');
+  b.lesionTo(0.2, 20260803); const small = sig();
+  b.lesionTo(0.4, 20260803); const big = sig();
+  for (let j = 0; j < b.nHid; j++) {
+    if (small[j] === '0' && big[j] !== '0') throw new Error('lesion sets are not nested');
+  }
+  b.lesionTo(0, 20260803);
+  if (b.aliveCount() !== b.nHid) throw new Error('lesion did not fully revert');
+  const snap = b.snapshot();
+  const before = b.evaluate(CONFIG.relation, 60).score;
+  b.reset();
+  b.restore(snap);
+  const after = b.evaluate(CONFIG.relation, 60).score;
+  if (Math.abs(before - after) > 6) throw new Error('snapshot/restore lost the weights');
+  console.log('lesion mask: repeatable, nested, fully reversible | snapshot restores (' +
+              before + ' -> ' + after + ')');
+}
+
+/* ---- 6. the presenter shell ------------------------------ */
+
+if (presScripts) (async () => {
+  console.log('\n-- presenter.html, the conference shell --');
+
+  const p = harness(read('presenter.html'));
+  const g = p.run(presScripts);
+  const pe = p.els;
+  console.log('shell loaded without error');
+  console.log('  header:', pe.pBrainName.textContent, '|', pe.pOwner.textContent);
+  console.log('  metrics: score', pe.mScore.textContent, '| hue', pe.mHue.textContent,
+              '| conf', pe.mConf.textContent, '| alive', pe.mAlive.textContent);
+
+  const key = (k, extra) => p.window._keydown(Object.assign(
+    { key: k, target: { tagName: 'BODY' }, preventDefault() {} }, extra || {}));
+
+  key(' ');
+  const pf = p.pump(600);
+  console.log('space train: ' + pf + ' frames, ' + pe.pSteps.textContent + ' examples, score ' +
+              pe.mScore.textContent + ', mode ' + pe.mMode.textContent);
+  key(' ');
+  console.log('space pause: ' + pe.status.textContent);
+
+  key('s');
+  console.log('s step:      ' + pe.status.textContent);
+
+  key('?');
+  if (pe.help.hidden) throw new Error('? did not open the shortcuts overlay');
+  key('Escape');
+  if (!pe.help.hidden) throw new Error('esc did not close the overlay');
+  console.log('? and esc:   overlay opens and closes');
+
+  key('l');
+  if (!pe.pLesion._focused) throw new Error('l did not focus the lesion slider');
+  console.log('l:           lesion slider focused');
+
+  for (const n of ['1', '3', '5']) {
+    key(n);
+    p.pump(40);
+    console.log('key ' + n + ':       ' + pe.status.textContent.slice(0, 62));
+  }
+
+  key('r');
+  console.log('r reset:     ' + pe.status.textContent);
+
+  // The lesion slider debounces, so give it time to land.
+  pe.pLesion._h.input({ target: { value: 40 } });
+  await new Promise(r => setTimeout(r, 120));
+  console.log('lesion 40%:  alive ' + pe.mAlive.textContent + ', ' + pe.status.textContent);
+  pe.pLesion._h.input({ target: { value: 0 } });
+  await new Promise(r => setTimeout(r, 120));
+  console.log('lesion 0%:   alive ' + pe.mAlive.textContent + ', ' + pe.status.textContent);
+
+  p.window._resize();
+  console.log('resize handled');
+  console.log('\npresenter shell OK');
+})().catch(e => { console.error('\nPRESENTER CHECK FAILED:', e.message); process.exit(1); });
