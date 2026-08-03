@@ -183,3 +183,83 @@ experiment 1 that has a meaningful hue error, which is all six relations except
 
 A strong negative correlation means high confidence goes with low error, which
 is what a working uncertainty estimate looks like.
+
+## 8. Backpropagation baseline
+
+`_dev/baseline.js`. A plain one hidden layer MLP, 28 to H to 28, ReLU hidden, linear
+output, mean squared error, online gradient descent. Dev only, never shipped.
+
+Everything except the learning is shared: the same input encoding, the same
+output readout, the same seeded stream of 4000 examples, the same 64 held-out
+probes, and the same scorer. Not a copy of the scorer: `Brain.prototype.evaluate`
+is borrowed with `.call()`, so there is exactly one scoring implementation and no
+way for the two to be measured differently.
+
+### Parameter counts
+
+| model | learnable | frozen | total |
+|---|---|---|---|
+| Hebbian, 256 cells | 7168 | 7168 | 14336 |
+| MLP, H=125 | 7153 | 0 | 7153 |
+| MLP, H=251 | 14335 | 0 | 14335 |
+
+Brian's input wiring is fixed at birth and never learns, so it has 7168 learnable
+parameters and 7168 frozen ones. H=125 matches the learnable count and H=251 matches
+the total, so both are reported rather than picking whichever flatters.
+
+### Score and hue error, mean of 10 seeds
+
+| model | score | hue error |
+|---|---|---|
+| Hebbian, 256 cells, one pass | 84.8 | 4.3° |
+| MLP, H=125, one pass | 95.8 | 1.6° |
+| MLP, H=125, 20 epochs | 96.6 | 1.3° |
+| MLP, H=251, 20 epochs | 96.8 | 1.3° |
+
+**Backpropagation wins on score, as expected.** MLP, H=251, 20 epochs reaches 96.8 against Brian's 84.8.
+
+### The lesion comparison, which is the interesting part
+
+| killed | Hebbian | MLP, H=125, 20 epochs | MLP, H=251, 20 epochs |
+|---|---|---|---|
+| 0% | 84.8 | 96.6 | 96.7 |
+| 5% | 85.1 | 93.9 | 94.5 |
+| 10% | 84.8 | 90.6 | 92.6 |
+| 15% | 84.7 | 88.0 | 90.5 |
+| 20% | 84.8 | 85.9 | 88.3 |
+| 25% | 85.1 | 83.0 | 87.1 |
+| 30% | 84.7 | 80.2 | 85.7 |
+| 35% | 84.3 | 78.2 | 83.6 |
+| 40% | 84.5 | 76.1 | 79.8 |
+| 45% | 84.0 | 71.7 | 76.6 |
+| 50% | 83.2 | 69.1 | 73.4 |
+| 55% | 83.2 | 64.4 | 71.6 |
+| 60% | 82.0 | 60.1 | 69.7 |
+| 65% | 81.4 | 59.4 | 65.4 |
+| 70% | 80.2 | 55.8 | 60.4 |
+| 75% | 78.8 | 53.2 | 55.0 |
+| 80% | 75.6 | 42.9 | 50.3 |
+| 85% | 70.5 | 34.4 | 47.7 |
+| 90% | 61.7 | 34.1 | 43.0 |
+| 95% | 52.0 | 26.5 | 36.6 |
+
+Retained score at each depth, as a fraction of undamaged:
+
+| killed | Hebbian | MLP, H=125, 20 epochs |
+|---|---|---|
+| 40% | 99.6% | 78.8% |
+| 80% | 89.2% | 44.4% |
+| 95% | 61.3% | 27.4% |
+
+The two curves cross at about 25 per cent killed. Below that, backpropagation is simply
+better. Above it, the Hebbian network is better, and the gap widens the more damage
+is done. At 95 per cent killed the Hebbian network keeps 61.3 per cent of its
+undamaged score and the matched MLP keeps 27.4 per cent.
+
+This is the result the thesis needed and it survived a fair test. Backpropagation
+is far better at the task. It is markedly worse at surviving damage, and nothing in
+either implementation asked for either of those properties.
+
+Chart: `lesion-comparison.svg`, committed for use on a slide.
+
+Total runtime for this file: 83.7 seconds.

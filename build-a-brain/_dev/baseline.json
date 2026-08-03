@@ -1,0 +1,375 @@
+{
+  "parameters": {
+    "brian": {
+      "learnable": 7168,
+      "frozen": 7168,
+      "total": 14336
+    },
+    "mlpMatchedLearnable": {
+      "h": 125,
+      "total": 7153
+    },
+    "mlpMatchedTotal": {
+      "h": 251,
+      "total": 14335
+    }
+  },
+  "results": {
+    "brian": {
+      "score": 84.8,
+      "hueErr": 4.274039586441752,
+      "conf": 0.9603571650025808
+    },
+    "mlp": {
+      "mlp-1pass": {
+        "label": "MLP, H=125, one pass",
+        "params": 7153,
+        "score": 95.8,
+        "hueErr": 1.5883385034683735
+      },
+      "mlp-20ep": {
+        "label": "MLP, H=125, 20 epochs",
+        "params": 7153,
+        "score": 96.6,
+        "hueErr": 1.2873500703295233
+      },
+      "mlp-big-20ep": {
+        "label": "MLP, H=251, 20 epochs",
+        "params": 14335,
+        "score": 96.8,
+        "hueErr": 1.297555069303137
+      }
+    },
+    "curves": {
+      "brian": [
+        {
+          "pct": 0,
+          "score": 84.8
+        },
+        {
+          "pct": 5,
+          "score": 85.1
+        },
+        {
+          "pct": 10,
+          "score": 84.8
+        },
+        {
+          "pct": 15,
+          "score": 84.7
+        },
+        {
+          "pct": 20,
+          "score": 84.8
+        },
+        {
+          "pct": 25,
+          "score": 85.1
+        },
+        {
+          "pct": 30,
+          "score": 84.7
+        },
+        {
+          "pct": 35,
+          "score": 84.3
+        },
+        {
+          "pct": 40,
+          "score": 84.5
+        },
+        {
+          "pct": 45,
+          "score": 84
+        },
+        {
+          "pct": 50,
+          "score": 83.2
+        },
+        {
+          "pct": 55,
+          "score": 83.2
+        },
+        {
+          "pct": 60,
+          "score": 82
+        },
+        {
+          "pct": 65,
+          "score": 81.4
+        },
+        {
+          "pct": 70,
+          "score": 80.2
+        },
+        {
+          "pct": 75,
+          "score": 78.8
+        },
+        {
+          "pct": 80,
+          "score": 75.6
+        },
+        {
+          "pct": 85,
+          "score": 70.5
+        },
+        {
+          "pct": 90,
+          "score": 61.7
+        },
+        {
+          "pct": 95,
+          "score": 52
+        }
+      ],
+      "mlp-1pass": [
+        {
+          "pct": 0,
+          "score": 95.6
+        },
+        {
+          "pct": 5,
+          "score": 93.6
+        },
+        {
+          "pct": 10,
+          "score": 90.3
+        },
+        {
+          "pct": 15,
+          "score": 89.3
+        },
+        {
+          "pct": 20,
+          "score": 87.5
+        },
+        {
+          "pct": 25,
+          "score": 85.9
+        },
+        {
+          "pct": 30,
+          "score": 83.7
+        },
+        {
+          "pct": 35,
+          "score": 82.2
+        },
+        {
+          "pct": 40,
+          "score": 80.7
+        },
+        {
+          "pct": 45,
+          "score": 77.1
+        },
+        {
+          "pct": 50,
+          "score": 75.6
+        },
+        {
+          "pct": 55,
+          "score": 72
+        },
+        {
+          "pct": 60,
+          "score": 68.4
+        },
+        {
+          "pct": 65,
+          "score": 66
+        },
+        {
+          "pct": 70,
+          "score": 62.1
+        },
+        {
+          "pct": 75,
+          "score": 59.6
+        },
+        {
+          "pct": 80,
+          "score": 49.3
+        },
+        {
+          "pct": 85,
+          "score": 40
+        },
+        {
+          "pct": 90,
+          "score": 38.3
+        },
+        {
+          "pct": 95,
+          "score": 30.8
+        }
+      ],
+      "mlp-20ep": [
+        {
+          "pct": 0,
+          "score": 96.6
+        },
+        {
+          "pct": 5,
+          "score": 93.9
+        },
+        {
+          "pct": 10,
+          "score": 90.6
+        },
+        {
+          "pct": 15,
+          "score": 88
+        },
+        {
+          "pct": 20,
+          "score": 85.9
+        },
+        {
+          "pct": 25,
+          "score": 83
+        },
+        {
+          "pct": 30,
+          "score": 80.2
+        },
+        {
+          "pct": 35,
+          "score": 78.2
+        },
+        {
+          "pct": 40,
+          "score": 76.1
+        },
+        {
+          "pct": 45,
+          "score": 71.7
+        },
+        {
+          "pct": 50,
+          "score": 69.1
+        },
+        {
+          "pct": 55,
+          "score": 64.4
+        },
+        {
+          "pct": 60,
+          "score": 60.1
+        },
+        {
+          "pct": 65,
+          "score": 59.4
+        },
+        {
+          "pct": 70,
+          "score": 55.8
+        },
+        {
+          "pct": 75,
+          "score": 53.2
+        },
+        {
+          "pct": 80,
+          "score": 42.9
+        },
+        {
+          "pct": 85,
+          "score": 34.4
+        },
+        {
+          "pct": 90,
+          "score": 34.1
+        },
+        {
+          "pct": 95,
+          "score": 26.5
+        }
+      ],
+      "mlp-big-20ep": [
+        {
+          "pct": 0,
+          "score": 96.7
+        },
+        {
+          "pct": 5,
+          "score": 94.5
+        },
+        {
+          "pct": 10,
+          "score": 92.6
+        },
+        {
+          "pct": 15,
+          "score": 90.5
+        },
+        {
+          "pct": 20,
+          "score": 88.3
+        },
+        {
+          "pct": 25,
+          "score": 87.1
+        },
+        {
+          "pct": 30,
+          "score": 85.7
+        },
+        {
+          "pct": 35,
+          "score": 83.6
+        },
+        {
+          "pct": 40,
+          "score": 79.8
+        },
+        {
+          "pct": 45,
+          "score": 76.6
+        },
+        {
+          "pct": 50,
+          "score": 73.4
+        },
+        {
+          "pct": 55,
+          "score": 71.6
+        },
+        {
+          "pct": 60,
+          "score": 69.7
+        },
+        {
+          "pct": 65,
+          "score": 65.4
+        },
+        {
+          "pct": 70,
+          "score": 60.4
+        },
+        {
+          "pct": 75,
+          "score": 55
+        },
+        {
+          "pct": 80,
+          "score": 50.3
+        },
+        {
+          "pct": 85,
+          "score": 47.7
+        },
+        {
+          "pct": 90,
+          "score": 43
+        },
+        {
+          "pct": 95,
+          "score": 36.6
+        }
+      ]
+    }
+  },
+  "totalMs": 83693
+}

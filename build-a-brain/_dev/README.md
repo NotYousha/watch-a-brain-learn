@@ -629,3 +629,66 @@ ceiling is still explained by `Wih` being fixed at birth.
 
 The brief's experiment 6 specified 50 per cent only, which can return nothing but a
 null result. It runs at 50, 80, 90 and 95.
+
+---
+
+## Phase 8: backprop baseline
+
+`_dev/baseline.js`. One hidden layer MLP, 28 to H to 28, ReLU hidden, linear
+output, mean squared error, online gradient descent. Pure JS, dev only, never
+shipped. Runtime 84 seconds.
+
+### The comparison is set up to be fair to backprop
+
+Same input encoding, same output readout, same seeded stream of 4000 examples,
+same 64 held-out probes, and the same scorer. Not a copy of the scorer:
+`Brain.prototype.evaluate` is borrowed with `.call()`, because the MLP exposes a
+`predict(color)` with the same shape. There is exactly one scoring implementation,
+so the two cannot be measured differently even by accident.
+
+The MLP also gets a longer run than Brian if it wants one. Both a single pass over
+the 4000 examples, which matches Brian's exposure, and 20 epochs over the same
+4000, which gives backprop 20 times the compute, are reported.
+
+### Parameter counts
+
+Brian has 7168 learnable parameters, the hidden to output weights, and 7168 frozen
+ones, the input wiring that is fixed at birth and never learns. An MLP of 28 to H
+to 28 costs 57H + 28. So H = 125 matches the learnable count at 7153 and H = 251
+matches the total at 14335. Both are reported rather than picking whichever
+flatters.
+
+### Backprop wins on score, comfortably
+
+| model | score | hue error |
+|---|---|---|
+| Hebbian, 256 cells, one pass | 84.8 | 4.3 deg |
+| MLP H=125, one pass | 95.6 | 1.6 deg |
+| MLP H=125, 20 epochs | 96.6 | 1.3 deg |
+| MLP H=251, 20 epochs | 96.8 | 1.3 deg |
+
+It wins even at matched exposure, one pass each, 95.6 against 84.8. There is no
+version of this where the Hebbian network is competitive on accuracy, and the talk
+should say so first rather than being made to admit it.
+
+### The lesion comparison is where the thesis holds
+
+Retained fraction of the undamaged score:
+
+| killed | Hebbian | MLP H=125 |
+|---|---|---|
+| 40% | 99.6% | 78.8% |
+| 80% | 89.2% | 44.4% |
+| 95% | 61.3% | 27.4% |
+
+The two curves cross at about 25 per cent killed. Below that backprop is simply
+better. Above it the Hebbian network is better and the gap widens the more damage
+is done.
+
+This is the result the thesis needed and it survived a fair test, which is worth
+more than if it had been rigged. Neither implementation asked for either property.
+Backprop was not told to be brittle and the Hebbian network was not told to be
+robust.
+
+`lesion-comparison.svg` is committed for use on a slide, 820 by 400, self
+contained, no fonts to load.
