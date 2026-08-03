@@ -88,8 +88,6 @@ Two front ends share the same network code:
 ### Header
 
 - the network's name and owner, from `config.js`
-- **`Original workshop by Kara Codex`**, linked upstream. Deliberately in the header
-  so it cannot scroll away and is on screen for the whole talk
 - six live config chips: task, neurons, wiring, fires, learn rate, seed
 - the wiring chip reads the **real measured** in-degree range, "each cell hears 1 to
   7 of 28", not the configured probability
@@ -510,5 +508,10 @@ The curves cross at about 25 per cent damage.
 - no licence file granting rights over someone else's work. `LICENSE-NOTE.md` states
   the position instead
 - no narration audio yet; the speech-synthesis fallback covers it
+- no attribution line in the interface. It was removed from the header at the
+  presenter's request. Authorship is recorded in `../README.md` and
+  `../LICENSE-NOTE.md`, and in the origin column of the file map above, because the
+  network, the colour maths, the crowd view and the teaching script are Kara Codex's
+  work and the upstream repository carries no licence
 - no attempt to claim this scales, or that it beats backpropagation at the task
 - no dark and light theme for the presenter. One projector, one palette

@@ -765,6 +765,17 @@ right by coincidence rather than by diagnosis.
 presenter header. It is in the header rather than a footer specifically so it
 cannot scroll away, and the header is on screen for the entire talk.
 
+**Superseded.** Removed from the header on request after phase 10. The interface now
+carries no attribution at all. Authorship is still recorded in `../README.md`, in
+`../LICENSE-NOTE.md`, and in the origin column of the file map in `FEATURES.md`.
+
+Those three were kept deliberately. `brain.js`, `colors.js`, `viz.js` and the
+teaching script are Kara Codex's work, the upstream repository carries no licence,
+and `LICENSE-NOTE.md` exists specifically to record that position. Removing the
+record as well as the on-screen line would leave the repository presenting her work
+with no statement of where it came from, which is a different thing from a tidier
+header.
+
 ---
 
 ## Phase 10: pre-flight
