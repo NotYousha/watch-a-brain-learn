@@ -234,15 +234,23 @@
   const trainer = new Shared.Trainer({
     total: CONFIG.trainingExamples,
     speedIdx: () => speedIdx,
-    example: () => Colors.makeExample(relation),
+    /* Probes.example() rather than Colors.makeExample(): the 64
+       held-out colours are filtered out of the training stream. */
+    example: () => Probes.example(relation),
     onExample: (ex) => {
       brain.learn(ex);
       lastInput = ex.input;
       lastTarget = Code.encode(ex.target);
+      sinceGrid++;
     },
     onFrame: (t) => {
       if (t.frame % 8 === 0) refresh();
       else draw();
+      // Convergence happens fastest in the first few hundred examples,
+      // which is exactly when a 200-example cadence leaves a stale
+      // number on screen. Re-render often early, then settle down.
+      const due = brain.stepsTrained < 600 ? 50 : GRID_EVERY;
+      if (sinceGrid >= due) { sinceGrid = 0; renderGrid(); }
       $('pSteps').textContent = Shared.fmt.int(brain.stepsTrained);
     },
     onDone: () => {
@@ -289,6 +297,7 @@
     NeuronView.invalidate();
     resetTriple();
     refresh();
+    renderGrid();
     say('every synapse blank again');
   }
 
@@ -313,6 +322,7 @@
       applyLesion();
       NeuronView.invalidate();
       const e = refresh();
+      renderGrid();
       say(pct === 0 ? 'all neurons restored' : pct + '% killed, score ' + e.score);
     }, 60);
   }
@@ -345,7 +355,9 @@
     NeuronView.invalidate();
     resetTriple();
     paintConfig();
+    paintStatic();
     refresh();
+    renderGrid();
     say('switched to ' + Colors.relations[name].label + ', retraining from scratch');
     trainer.start(CONFIG.trainingExamples);
     setTrainLabel(true);
@@ -450,15 +462,66 @@
     }
   });
 
-  /* ---- placeholder strips ---------------------------------
-     The held-out probe grid is filled in phase 3. The cells exist
-     now so the layout is honest about how much room it needs. */
+  /* ---- the prediction grid --------------------------------
+     Three rows of 64: the colour shown, what the network answers,
+     and the correct answer. The middle row starts as noise and
+     settles onto the bottom row.
 
-  for (const id of ['stripIn', 'stripGot', 'stripWant']) {
-    const box = $(id);
-    let html = '';
-    for (let i = 0; i < 64; i++) html += '<i></i>';
-    box.innerHTML = html;
+     The number beside it is the mean hue error over all 64. It is
+     the closest thing this architecture allows to a training curve,
+     and it is worth saying out loud that it is not a loss curve:
+     nothing in the code computes a loss, and nothing compares the
+     answer to the target. This is measured from the outside.     */
+
+  const GRID_EVERY = 200;
+  let sinceGrid = 0;
+  let truthRows = null;
+  const cells = { in: [], got: [], want: [] };
+
+  function buildGrid() {
+    const map = { in: 'stripIn', got: 'stripGot', want: 'stripWant' };
+    for (const key of Object.keys(map)) {
+      const box = $(map[key]);
+      box.innerHTML = '';
+      cells[key] = [];
+      for (let i = 0; i < Probes.list.length; i++) {
+        cells[key].push(box.appendChild(document.createElement('i')));
+      }
+    }
+  }
+
+  /* The shown row and the correct row only change when the relation
+     changes, so they are painted once rather than every 200 examples.
+     Ambiguous relations pick one of their two answers per call, so
+     the correct row is frozen here and reused, otherwise it would
+     flicker for reasons unrelated to learning. */
+  function paintStatic() {
+    truthRows = Probes.truth(relation);
+    for (let i = 0; i < Probes.list.length; i++) {
+      const c = Probes.list[i], w = truthRows[i];
+      cells.in[i].style.background = Colors.css(Colors.hsv2rgb(c.h, c.s, c.v));
+      cells.want[i].style.background = Colors.css(Colors.hsv2rgb(w.h, w.s, w.v));
+    }
+  }
+
+  function now() {
+    return (typeof performance !== 'undefined' && performance.now) ? performance.now() : 0;
+  }
+
+  function renderGrid() {
+    const t0 = now();
+    const r = Probes.answers(brain, relation, truthRows);
+    for (let i = 0; i < r.got.length; i++) {
+      const g = r.got[i];
+      cells.got[i].style.background = Colors.css(Colors.hsv2rgb(g.h, g.s, g.v));
+    }
+    const ms = now() - t0;
+    restoreDisplay();
+    $('gridErr').innerHTML =
+      'mean hue error <b>' + Shared.fmt.deg(r.hueError) + '</b>' +
+      '<span style="color:var(--text-lo)"> &nbsp;64 held out, ' +
+      Probes.rejected + ' refused by the trainer &nbsp;' + ms.toFixed(1) + 'ms</span>';
+    return r;
   }
 
   /* ---- start ----------------------------------------------- */
@@ -467,7 +530,10 @@
   paintConfig();
   sizeVotes();
   resetTriple();
+  buildGrid();
+  paintStatic();
   refresh();
+  renderGrid();
   say('ready. press space to train, ? for keys');
 
   /* presenter.html#train starts a run on load. Used by the headless

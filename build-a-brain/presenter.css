@@ -272,7 +272,7 @@ body {
 .strip {
   display: grid;
   grid-template-columns: repeat(64, 1fr);
-  height: clamp(34px, 5vh, 58px);
+  height: clamp(40px, 8vh, 92px);
   border: 1px solid var(--rule);
   border-radius: 3px;
   overflow: hidden;

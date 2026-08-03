@@ -265,6 +265,28 @@ if (presScripts) (async () => {
   console.log('  metrics: score', pe.mScore.textContent, '| hue', pe.mHue.textContent,
               '| conf', pe.mConf.textContent, '| alive', pe.mAlive.textContent);
 
+  /* The held-out set has to be provably held out, not just described
+     as held out, because that is the whole basis for the numbers. */
+  const P = g.Probes;
+  if (P.list.length !== 64) throw new Error('expected 64 probes, got ' + P.list.length);
+  if (!P.list.every((c) => P.isHeldOut(c))) throw new Error('a probe is not recognised as held out');
+  let leaked = 0;
+  for (let i = 0; i < 20000; i++) {
+    if (P.isHeldOut(P.example(g.CONFIG.relation).input)) leaked++;
+  }
+  if (leaked) throw new Error(leaked + ' probe colours leaked into the training stream');
+  console.log('held-out set: 64 probes, 0 of 20000 training colours landed on one, ' +
+              P.rejected + ' refused');
+
+  {
+    const b = new g.Brain(g.CONFIG);
+    const before = P.answers(b, 'complement').hueError;
+    for (let i = 0; i < 4000; i++) b.learn(P.example('complement'));
+    const after = P.answers(b, 'complement').hueError;
+    console.log('held-out hue error: ' + before.toFixed(1) + ' deg -> ' + after.toFixed(1) + ' deg');
+    if (!(after < before / 3)) throw new Error('held-out error did not converge');
+  }
+
   const key = (k, extra) => p.window._keydown(Object.assign(
     { key: k, target: { tagName: 'BODY' }, preventDefault() {} }, extra || {}));
 

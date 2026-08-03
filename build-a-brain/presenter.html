@@ -64,8 +64,11 @@
         <div class="gridrow"><label>correct</label><div class="strip" id="stripWant"></div></div>
       </div>
       <p class="note" id="gridNote">
-        These 64 colours are held out: the training stream never shows them.
-        The middle row is the network's answer. Watch it settle onto the bottom row.
+        These 64 colours are held out. The trainer refuses them, so the middle row
+        is the network answering colours it has never been shown. Watch it settle
+        onto the bottom row. That falling number is not a loss curve: nothing in
+        the code computes a loss, and nothing ever compares the answer to the
+        target. It is measured from outside, after the fact.
       </p>
     </section>
 
@@ -124,6 +127,7 @@
 <script src="brain.js"></script>
 <script src="config.js"></script>
 <script src="shared.js"></script>
+<script src="probes.js"></script>
 <script src="viz.js"></script>
 <script src="neuronview.js"></script>
 <script src="presenter.js"></script>

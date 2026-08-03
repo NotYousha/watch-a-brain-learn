@@ -280,3 +280,67 @@ the bin spacing, not an error: hue cells sit every 22.5 degrees, so the reported
 hump is the loudest cell, not the interpolated answer. The interpolated answer is
 what `decode()` returns and what the hue error metric uses. Worth knowing before
 someone asks why the label says 23.
+
+---
+
+## Phase 3: the prediction grid
+
+New `probes.js`. 64 fixed colours, 16 hues at four combinations of vividness and
+brightness, so the strip reads as four hue sweeps rather than noise.
+
+### How the hold-out is enforced
+
+Two mechanisms, and the brief asked for this to be logged, so:
+
+1. **The trainer refuses them.** `Probes.example(relation)` draws from
+   `Colors.makeExample()` and throws the candidate away if it lands within
+   `RADIUS` of any probe, which is 1.2 degrees of hue and 0.02 of both saturation
+   and brightness. `presenter.js` uses `Probes.example()` and never
+   `Colors.makeExample()` for training. `Probes.rejected` counts the throwaways
+   and the count is shown on screen beside the grid, so the enforcement is
+   visible rather than asserted.
+2. **Nothing ever learns a probe.** The grid only calls `predict()`, which writes
+   to `out`, `inp` and `hid` but never to `Who`.
+
+Verified in `_verify_ui.js`: all 64 probes are recognised as held out, and across
+20000 generated training colours, zero landed on a probe. The refusal rate is
+about 0.26 percent, which matches the radius.
+
+The four levels all sit inside the range `Colors.randomColor()` draws from, s and
+v both 0.45 to 1.0. That matters: probes outside the training distribution would
+make a bad score meaningless.
+
+### Render cost, measured honestly
+
+The brief asked for under 8ms. Measured over 40 runs on a trained 256-neuron
+brain, in Node, excluding the DOM writes:
+
+```
+min 5.61ms   median 6.23ms   max 9.00ms   cold first render 6.05ms
+```
+
+So the median is comfortably inside 8ms but the tail is not: it can spike to 9ms,
+and in the browser the 64 style writes add roughly another 1 to 3ms. The observed
+worst case on screen was 9.5ms.
+
+The dominant cost is not the drawing, it is `think()`: each of the 64 `predict()`
+calls builds and sorts one array per pool, so a single render performs 128 sorts.
+That cannot be reduced without touching the competition, which is forbidden and
+rightly so. Since the grid re-renders every 200 examples, the worst case is an
+occasional dropped frame rather than a stall. Worth knowing rather than claiming
+a clean pass.
+
+### The cadence is not a flat 200
+
+Convergence is fastest in the first few hundred examples, which is exactly when a
+flat 200-example cadence leaves a stale number on screen. The first screenshot
+caught it at 198 examples still displaying the untrained 90 degree error, which
+would be an unfortunate thing to have happen live. It now re-renders every 50
+examples until 600 have been seen, then settles to the configured 200.
+
+### Correct row is frozen per relation
+
+`triadic` and `split-complement` pick one of their two correct answers at random
+inside `apply()`, so recomputing ground truth every render would make the bottom
+row flicker for reasons that have nothing to do with learning. `paintStatic()`
+computes it once per relation and `Probes.answers()` takes it as an argument.
