@@ -255,8 +255,20 @@
     },
     onDone: () => {
       setTrainLabel(false);
-      say('run finished, ' + Shared.fmt.int(brain.stepsTrained) + ' examples seen');
       refresh();
+      renderGrid();
+      if (pendingRetrain) {
+        pendingRetrain = false;
+        setScore('sRetrain', brain.evaluate(relation, 120).score);
+        restoreDisplay();
+        say('retrained with ' + lesionPct + '% of the cells still dead');
+      } else {
+        say('run finished, ' + Shared.fmt.int(brain.stepsTrained) + ' examples seen');
+      }
+      // The weights changed, so the old curve is wrong. Recompute now
+      // rather than on the first drag, which would stall mid-gesture.
+      lesionCurve = null;
+      computeLesionCurve();
     }
   });
 
@@ -296,6 +308,8 @@
     lastTarget = null;
     NeuronView.invalidate();
     resetTriple();
+    lesionCurve = null;
+    drawLesionChart();
     refresh();
     renderGrid();
     say('every synapse blank again');
@@ -323,15 +337,121 @@
       NeuronView.invalidate();
       const e = refresh();
       renderGrid();
-      say(pct === 0 ? 'all neurons restored' : pct + '% killed, score ' + e.score);
+      if (!lesionCurve && brain.stepsTrained > 0) computeLesionCurve();
+      drawLesionChart();
+      if (lesionCurve) {
+        setScore('sBefore', lesionCurve[0].score);
+        setScore('sAfter', pct === 0 ? null : e.score);
+      }
+      say(pct === 0 ? 'all neurons restored, score ' + e.score
+                    : pct + '% killed, score ' + e.score);
     }, 60);
   }
 
-  function resetTriple() {
-    for (const id of ['sBefore', 'sAfter', 'sRetrain']) {
-      $(id).textContent = '—';
-      $(id).classList.add('pending');
+  function setScore(id, v) {
+    const el = $(id);
+    if (v == null) {
+      el.textContent = '—';
+      el.classList.add('pending');
+    } else {
+      el.textContent = String(v);
+      el.classList.remove('pending');
     }
+  }
+
+  function resetTriple() {
+    setScore('sBefore', null);
+    setScore('sAfter', null);
+    setScore('sRetrain', null);
+  }
+
+  /* ---- the lesion curve -----------------------------------
+     Score against percentage killed, computed by actually killing
+     them and actually re-measuring, twenty times. Costs about 110ms,
+     so it runs once when a training run finishes rather than on
+     every drag. Invalidated by anything that changes the weights. */
+
+  let lesionCurve = null;
+
+  function computeLesionCurve() {
+    const keep = lesionPct;
+    const pts = [];
+    for (let pct = 0; pct <= 95; pct += 5) {
+      brain.lesionTo(pct / 100, Shared.LESION_SEED);
+      pts.push({ pct, score: brain.evaluate(relation, 60).score });
+    }
+    brain.lesionTo(keep / 100, Shared.LESION_SEED);
+    restoreDisplay();
+    lesionCurve = pts;
+    drawLesionChart();
+    return pts;
+  }
+
+  function drawLesionChart() {
+    const svg = $('lesionChart');
+    const W = 300, H = 72, L = 24, R = 4, T = 6, B = 14;
+    const px = (pct) => L + (pct / 95) * (W - L - R);
+    const py = (s) => T + (1 - Math.max(0, Math.min(100, s)) / 100) * (H - T - B);
+    const parts = [];
+
+    parts.push('<line x1="' + L + '" y1="' + py(0) + '" x2="' + (W - R) +
+               '" y2="' + py(0) + '" stroke="#33383B" stroke-width="1"/>');
+    parts.push('<text x="0" y="10" fill="#676D70" font-size="9" ' +
+               'font-family="ui-monospace, Menlo, monospace">100</text>');
+    parts.push('<text x="6" y="' + (py(0) + 3) + '" fill="#676D70" font-size="9" ' +
+               'font-family="ui-monospace, Menlo, monospace">0</text>');
+    parts.push('<text x="' + L + '" y="' + H + '" fill="#676D70" font-size="9" ' +
+               'font-family="ui-monospace, Menlo, monospace">0%</text>');
+    parts.push('<text x="' + (W - R) + '" y="' + H + '" fill="#676D70" font-size="9" ' +
+               'text-anchor="end" font-family="ui-monospace, Menlo, monospace">95%</text>');
+
+    if (lesionCurve) {
+      let d = '';
+      lesionCurve.forEach((p, i) => {
+        const x0 = px(p.pct), x1 = px(Math.min(95, p.pct + 5)), y = py(p.score);
+        d += (i === 0 ? 'M' : 'L') + x0.toFixed(1) + ' ' + y.toFixed(1) +
+             ' L' + x1.toFixed(1) + ' ' + y.toFixed(1);
+      });
+      parts.push('<path d="' + d + '" fill="none" stroke="#9BA1A3" stroke-width="1.5"/>');
+
+      const here = lesionCurve[Math.round(lesionPct / 5)];
+      if (here) {
+        parts.push('<line x1="' + px(here.pct) + '" y1="' + T + '" x2="' + px(here.pct) +
+                   '" y2="' + py(0) + '" stroke="#E8EAE6" stroke-width="1" opacity="0.5"/>');
+        parts.push('<circle cx="' + px(here.pct) + '" cy="' + py(here.score) +
+                   '" r="3.5" fill="#E8EAE6"/>');
+      }
+    } else {
+      parts.push('<text x="' + (W / 2) + '" y="' + (H / 2) + '" fill="#676D70" font-size="10" ' +
+                 'text-anchor="middle" font-family="ui-monospace, Menlo, monospace">' +
+                 'train, then drag</text>');
+    }
+
+    svg.innerHTML = parts.join('');
+  }
+
+  /* ---- retrain the survivors -------------------------------
+     Does the damage heal? Keep the mask on and train a fresh run.
+     Dead cells never fire, so they never learn: only the survivors
+     reorganise. All three numbers stay on screen together. */
+
+  let pendingRetrain = false;
+
+  function retrainLesioned() {
+    if (lesionPct === 0) {
+      say('kill some neurons first, then retrain the survivors');
+      return;
+    }
+    if (!lesionCurve) computeLesionCurve();
+    setScore('sBefore', lesionCurve[0].score);
+    setScore('sAfter', brain.evaluate(relation, 120).score);
+    setScore('sRetrain', null);
+    restoreDisplay();
+    pendingRetrain = true;
+    trainer.pause();
+    trainer.start(CONFIG.trainingExamples);
+    setTrainLabel(true);
+    say('retraining ' + brain.aliveCount() + ' survivors, ' + lesionPct + '% still dead');
   }
 
   /* ---- relation switching ---------------------------------- */
@@ -354,6 +474,8 @@
     lastTarget = null;
     NeuronView.invalidate();
     resetTriple();
+    lesionCurve = null;
+    drawLesionChart();
     paintConfig();
     paintStatic();
     refresh();
@@ -394,6 +516,7 @@
   $('pTrain').addEventListener('click', toggleTrain);
   $('pStep').addEventListener('click', stepOnce);
   $('pReset').addEventListener('click', resetWeights);
+  $('pRetrain').addEventListener('click', retrainLesioned);
   $('pRelation').addEventListener('change', (ev) => switchRelation(ev.target.value));
   $('pLesion').addEventListener('input', (ev) => onLesionInput(Number(ev.target.value)));
   $('pHelp').addEventListener('click', () => { $('help').hidden = !$('help').hidden; });
@@ -532,6 +655,7 @@
   resetTriple();
   buildGrid();
   paintStatic();
+  drawLesionChart();
   refresh();
   renderGrid();
   say('ready. press space to train, ? for keys');

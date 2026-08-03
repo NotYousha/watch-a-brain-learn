@@ -344,3 +344,67 @@ examples until 600 have been seen, then settles to the configured 200.
 inside `apply()`, so recomputing ground truth every render would make the bottom
 row flicker for reasons that have nothing to do with learning. `paintStatic()`
 computes it once per relation and `Probes.answers()` takes it as an argument.
+
+---
+
+## Phase 4: live lesion slider
+
+Uses `brain.lesionTo()` from phase 1, not the built-in `lesion()`. Same slider
+position always kills the same cells, 40 percent is a superset of 20 percent, and
+dragging back to zero restores exactly. Debounced at 60ms.
+
+The step chart is inline SVG built by string, no library. The curve costs about
+110ms to compute, twenty real lesions and twenty real evaluations, so it runs when
+a training run finishes rather than mid-drag, and is invalidated by anything that
+changes the weights.
+
+### The lesion curve, measured
+
+4000 examples, 300-colour evaluation at each point, deterministic mask:
+
+| killed | 0% | 20% | 40% | 50% | 60% | 75% | 80% | 90% | 95% |
+|---|---|---|---|---|---|---|---|---|---|
+| complement | 85 | 86 | 87 | 84 | 84 | 82 | 71 | 65 | 53 |
+| warmer | 85 | 83 | 85 | 82 | 80 | 79 | 73 | 66 | 52 |
+
+This matches the figures in the brief: 86 at 0 percent, 86 at 40 percent, and
+about 54 at 95 percent. Nothing needed adjusting. Dragging back to 0 returns to
+the starting score exactly. All four assertions are now in `_verify_ui.js`.
+
+### Retraining the survivors does not recover the damage
+
+This is the open question the brief wanted answered, and the answer is no. It
+contradicts what "Retrain lesioned" implicitly promises, so it is worth stating
+plainly. Pre-lesion, post-lesion, and post-retrain scores after a further 4000
+examples with the mask held on:
+
+| relation | killed | pre | post | retrained | alive | verdict |
+|---|---|---|---|---|---|---|
+| complement | 50% | 85 | 86 | 84 | 128 | nothing was lost to recover |
+| complement | 80% | 86 | 79 | 80 | 51 | no recovery |
+| complement | 90% | 85 | 65 | 67 | 26 | within noise |
+| complement | 95% | 84 | 51 | 47 | 13 | no recovery |
+| warmer | 50% | 85 | 82 | 83 | 128 | no recovery |
+| warmer | 80% | 84 | 73 | 73 | 51 | no recovery |
+| warmer | 90% | 85 | 67 | 66 | 26 | no recovery |
+| warmer | 95% | 86 | 57 | 61 | 13 | within noise |
+
+Every change is inside the roughly two point run to run noise of `evaluate()`.
+
+Two things follow, and both are better talking points than a recovery would have
+been.
+
+First, the brief's phase 7 experiment 6 specifies lesioning 50 percent and
+retraining. At 50 percent there is no damage to recover: the score is already
+unchanged. The experiment as specified can only ever return a null result. Phase
+7 runs it at 50, 80, 90 and 95 percent instead, so there is something to measure.
+
+Second, the reason it cannot recover is worth saying out loud, because it makes
+the redundancy claim sharper rather than weaker. Retraining can only change
+`Who`, the hidden to output weights. `Wih`, the input wiring that decides what
+each cell is tuned to, is fixed at birth and never learns. Kill 95 percent of the
+cells and the 13 survivors have a fixed, sparse, arbitrary set of tuning curves
+that between them simply do not cover the hue wheel. What was lost is
+representational capacity, not readout. So the fault tolerance in this
+architecture is built in at birth by spreading the answer widely, and it is not
+re-acquirable afterwards. That is a stronger claim than "it heals".

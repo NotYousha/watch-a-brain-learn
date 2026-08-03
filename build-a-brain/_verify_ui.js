@@ -199,7 +199,7 @@ console.log('all ' + Colors.relationNames.length + ' relations train + render cl
 
 {
   const b = new Brain(CONFIG);
-  for (let i = 0; i < 300; i++) b.learn(Colors.makeExample(CONFIG.relation));
+  for (let i = 0; i < 4000; i++) b.learn(Colors.makeExample(CONFIG.relation));
   const sig = () => Array.from(b.alive).join('');
   b.lesionTo(0.4, 20260803); const a1 = sig();
   b.lesionTo(0.0, 20260803);
@@ -220,6 +220,23 @@ console.log('all ' + Colors.relationNames.length + ' relations train + render cl
   if (Math.abs(before - after) > 6) throw new Error('snapshot/restore lost the weights');
   console.log('lesion mask: repeatable, nested, fully reversible | snapshot restores (' +
               before + ' -> ' + after + ')');
+
+  /* Graceful degradation is the claim the whole last third of the
+     talk rests on, so assert its shape rather than trusting it. */
+  b.lesionTo(0, 20260803);
+  const at0 = b.evaluate(CONFIG.relation, 300).score;
+  b.lesionTo(0.4, 20260803);
+  const at40 = b.evaluate(CONFIG.relation, 300).score;
+  b.lesionTo(0.95, 20260803);
+  const at95 = b.evaluate(CONFIG.relation, 300).score;
+  b.lesionTo(0, 20260803);
+  const back = b.evaluate(CONFIG.relation, 300).score;
+  console.log('lesion curve: 0% ' + at0 + ' | 40% ' + at40 + ' | 95% ' + at95 +
+              ' | back to 0% ' + back + ' (' + b.aliveCount() + ' alive)');
+  if (Math.abs(at40 - at0) > 6) throw new Error('40% should barely move the score');
+  if (at95 > at0 - 15) throw new Error('95% should visibly degrade the score');
+  if (at95 < 30) throw new Error('95% should degrade, not collapse');
+  if (Math.abs(back - at0) > 4) throw new Error('lesion did not fully reverse');
 }
 
 /* ---- 6. what the confidence widget claims ----------------
@@ -316,16 +333,39 @@ if (presScripts) (async () => {
     console.log('key ' + n + ':       ' + pe.status.textContent.slice(0, 62));
   }
 
+  // Back to a trained brain, then drive the lesion slider. It
+  // debounces at 60ms, so each change needs a moment to land.
+  // Switching relation starts its own run, so do not also press space:
+  // that would toggle the run it just started straight back off.
+  key('1');
+  p.pump(2500);
+
+  pe.pLesion._h.input({ target: { value: 40 } });
+  await new Promise(r => setTimeout(r, 140));
+  console.log('lesion 40%:  alive ' + pe.mAlive.textContent + ', ' + pe.status.textContent);
+  if (!/<path/.test(pe.lesionChart.innerHTML)) {
+    throw new Error('the lesion step chart drew no curve');
+  }
+  if (pe.sBefore.textContent === '—' || pe.sAfter.textContent === '—') {
+    throw new Error('before/lesioned scores did not populate');
+  }
+  console.log('step chart:  curve drawn | before ' + pe.sBefore.textContent +
+              ' | lesioned ' + pe.sAfter.textContent);
+
+  pe.pRetrain._h.click();
+  p.pump(4000);
+  await new Promise(r => setTimeout(r, 20));
+  console.log('retrain:     ' + pe.status.textContent);
+  if (pe.sRetrain.textContent === '—') throw new Error('retrain produced no third number');
+  console.log('three scores: before ' + pe.sBefore.textContent + ' | lesioned ' +
+              pe.sAfter.textContent + ' | retrained ' + pe.sRetrain.textContent);
+
+  pe.pLesion._h.input({ target: { value: 0 } });
+  await new Promise(r => setTimeout(r, 140));
+  console.log('lesion 0%:   alive ' + pe.mAlive.textContent + ', ' + pe.status.textContent);
+
   key('r');
   console.log('r reset:     ' + pe.status.textContent);
-
-  // The lesion slider debounces, so give it time to land.
-  pe.pLesion._h.input({ target: { value: 40 } });
-  await new Promise(r => setTimeout(r, 120));
-  console.log('lesion 40%:  alive ' + pe.mAlive.textContent + ', ' + pe.status.textContent);
-  pe.pLesion._h.input({ target: { value: 0 } });
-  await new Promise(r => setTimeout(r, 120));
-  console.log('lesion 0%:   alive ' + pe.mAlive.textContent + ', ' + pe.status.textContent);
 
   p.window._resize();
   console.log('resize handled');
