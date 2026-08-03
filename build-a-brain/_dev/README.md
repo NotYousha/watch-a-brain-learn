@@ -821,3 +821,22 @@ three where the measurements went against the write-up, and a symptom-to-fix tab
 The last row of that table is the important one: if the presenter build fails
 entirely, `index.html` is the original lab UI, shares the same brain code, and has
 enough on it to give the talk from.
+
+### Post-phase fix: stop 1's copy
+
+Found by screenshotting stop 1 rather than by any verifier, because it was valid
+text, just wrong text. The `{task}` placeholder was interpolating
+`Colors.relations[rel].blurb`, which is a standalone sentence with its own capital
+letter and a worked example: "The colour directly opposite on the wheel. Red ->
+cyan." Dropped mid-sentence that produced:
+
+> learned to turn a colour into The colour directly opposite on the wheel. Red ->
+> cyan. Nothing here was programmed to do that.
+
+Which is the very first thing the room reads. `tour.js` now holds
+`TASK_PHRASES`, one short lowercase phrase per relation that reads correctly
+mid-sentence, falling back to the old behaviour for anything not listed.
+
+Worth noting the verifier could not have caught this: it checks that no
+`{placeholder}` survives interpolation, and this one interpolated perfectly well.
+Some things only a screenshot finds.

@@ -193,8 +193,22 @@ const Tour = {
      the stop is shown. Add one here and you can use {name} in any
      title or body above. */
 
+  /* Short lowercase phrases that read correctly mid-sentence. The
+     relation blurbs in colors.js are standalone sentences with their
+     own capital and a "Red -> cyan" example, which produce nonsense
+     when dropped into the middle of stop 1. */
+
+  TASK_PHRASES: {
+    complement: 'the colour directly opposite it on the wheel',
+    analogous: 'its neighbour thirty degrees around the wheel',
+    triadic: 'a colour a third of the way around the wheel, in either direction',
+    'split-complement': 'a colour just to one side or the other of its opposite',
+    warmer: 'a warmer, richer version of itself',
+    luminance: 'the grey that matches how bright it looks'
+  },
+
   FILLERS: {
-    task:     (ctx) => ctx.taskPhrase(),
+    task:     (ctx) => Tour.TASK_PHRASES[ctx.relationName()] || ctx.taskPhrase(),
     firing:   (ctx) => String(ctx.firingCount()),
     inMin:    (ctx) => String(ctx.wiring().min),
     inMax:    (ctx) => String(ctx.wiring().max),
