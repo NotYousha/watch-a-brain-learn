@@ -127,7 +127,16 @@
     $('mAlive').textContent = Shared.fmt.alive(brain);
     $('mFiring').textContent = Shared.firingCount(brain) + ' firing right now';
     $('pSteps').textContent = Shared.fmt.int(brain.stepsTrained);
-    $('mMode').textContent = mode.label;
+
+    /* "silent" means no hue cell is voting at all. That is two very
+       different situations and saying the wrong one is confusing in
+       front of a room: an untrained brain has not learned yet, but on
+       luminance every correct answer is a grey, so no hue vote is the
+       right answer rather than a failure. */
+    $('mMode').textContent = mode.mode !== 'silent' ? mode.label
+      : brain.stepsTrained === 0 ? 'nothing learned yet'
+      : 'no hue vote, every correct answer here is a grey';
+    $('mMode').style.color = mode.mode === 'bimodal' ? 'var(--signal)' : 'var(--text-mid)';
 
     drawVotes(vec, mode);
     draw();
@@ -153,8 +162,21 @@
     const ctx = votesCtx;
     ctx.clearRect(0, 0, w, h);
 
-    let peak = 0;
-    for (let i = 0; i < vec.length; i++) if (vec[i] > peak) peak = vec[i];
+    /* Each of the three populations is normalised against its own
+       loudest cell, not against all 28 together. That is not a
+       flattering choice, it is how decode() actually reads them: hue
+       by circular mean across the hue run, vividness and brightness
+       each by a peak within their own run. Normalising all 28
+       together would let the brightness cells, which carry more
+       total weight, visually crush the hue spike that is the whole
+       point of this panel. */
+    const groups = [[0, HUE_N], [HUE_N, HUE_N + SAT_N], [HUE_N + SAT_N, DIM]];
+    const scale = new Float64Array(vec.length);
+    for (const [lo, hi] of groups) {
+      let gp = 0;
+      for (let i = lo; i < hi; i++) if (vec[i] > gp) gp = vec[i];
+      for (let i = lo; i < hi; i++) scale[i] = gp > 1e-9 ? vec[i] / gp : 0;
+    }
 
     const n = vec.length;
     const slot = w / n;
@@ -178,10 +200,11 @@
     }
 
     for (let i = 0; i < n; i++) {
-      const v = peak > 1e-9 ? vec[i] / peak : 0;
+      const v = scale[i];
       const bh = Math.max(v > 0 ? 1 : 0, v * (base - 2));
+      // The hue run is the story, so it is the bright one.
       ctx.fillStyle = i < HUE_N ? RIG.text : RIG.dim;
-      ctx.globalAlpha = i < HUE_N ? 0.35 + v * 0.65 : 0.30 + v * 0.45;
+      ctx.globalAlpha = i < HUE_N ? 0.40 + v * 0.60 : 0.25 + v * 0.35;
       ctx.fillRect(i * slot + 1, base - bh, barW, bh);
     }
     ctx.globalAlpha = 1;

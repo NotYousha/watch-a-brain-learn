@@ -222,7 +222,37 @@ console.log('all ' + Colors.relationNames.length + ' relations train + render cl
               before + ' -> ' + after + ')');
 }
 
-/* ---- 6. the presenter shell ------------------------------ */
+/* ---- 6. what the confidence widget claims ----------------
+   The talk rests on this: an unambiguous relation votes as one
+   spike, an ambiguous one visibly votes for two answers at once and
+   the confidence collapses. If that ever stops being true, the
+   verifier should say so before a room full of engineers does. */
+
+{
+  const Shared = globals.Shared;
+  const probe = { h: 0, s: 0.95, v: 0.95 };
+
+  function shapeOf(rel) {
+    const b = new Brain(Object.assign({}, CONFIG, { relation: rel }));
+    for (let i = 0; i < 4000; i++) b.learn(Colors.makeExample(rel));
+    return {
+      mode: Shared.bimodality(Shared.votes(b, probe)),
+      conf: b.evaluate(rel, 200).confidence
+    };
+  }
+
+  const one = shapeOf('complement');
+  const two = shapeOf('triadic');
+  console.log('vote shape  complement: ' + one.mode.label +
+              ', confidence ' + Math.round(one.conf * 100) + '%');
+  console.log('vote shape  triadic:    ' + two.mode.label +
+              ', confidence ' + Math.round(two.conf * 100) + '%');
+  if (one.mode.mode !== 'unimodal') throw new Error('complement should vote as one spike');
+  if (two.mode.mode !== 'bimodal') throw new Error('triadic should vote for two answers');
+  if (two.conf >= one.conf) throw new Error('ambiguity should collapse confidence');
+}
+
+/* ---- 7. the presenter shell ------------------------------ */
 
 if (presScripts) (async () => {
   console.log('\n-- presenter.html, the conference shell --');

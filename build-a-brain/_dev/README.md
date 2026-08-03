@@ -227,3 +227,56 @@ transformation, which is a fair complaint. `CONFIG.relation` is now `complement`
 the clean opposite-on-the-wheel flip. Only the config value changed. No relation
 definition in `colors.js` was touched, and all six are still reachable live on
 keys 1 to 6.
+
+---
+
+## Phase 2: metrics and the confidence widget
+
+Most of this landed with the shell in phase 1. What phase 2 added is the
+measurement that the panel's claim is actually true, plus two fixes.
+
+### The claim, measured
+
+Trained 4000 examples per relation, then read the vote distribution for one fixed
+probe colour, pure red at h 0:
+
+| relation | confidence | score | vote shape |
+|---|---|---|---|
+| complement | 96% | 86 | unimodal, one spike at 180 deg |
+| analogous | 96% | 86 | unimodal, spike at 23 deg |
+| triadic | 53% | 51 | **bimodal, peaks 135 deg apart**, humps at 113 and 248 |
+| split-complement | 86% | 69 | bimodal, peaks 45 deg apart, humps at 158 and 203 |
+| warmer | 93% | 85 | unimodal, spike at 23 deg |
+| luminance | 0% | 84 | no hue vote at all, by design |
+
+Triadic's two correct answers for red are 120 and 240. The network puts its two
+humps at 113 and 248, so the picture the talk needs is real and not a stretch.
+This is now asserted in `_verify_ui.js`, including that ambiguity collapses
+confidence relative to complement, so it cannot quietly stop being true.
+
+### The vote distribution is normalised per population, not globally
+
+Each of the three groups is scaled against its own loudest cell. That needs
+saying out loud because it sounds like flattery and is not: `Code.decode()` reads
+hue by circular mean across the 16 hue cells, and reads vividness and brightness
+each by a peak within their own six. Normalising all 28 against one global peak
+let the brightness cells, which carry more total weight, visually crush the hue
+spike that is the entire point of the panel. Per population matches how the
+network reads itself.
+
+### Two labels that were wrong
+
+- A brain with no hue vote at all was reading "no vote yet", which is right for an
+  untrained brain and misleading on `luminance`, where every correct answer is a
+  grey and no hue vote is the correct result rather than a failure. Now
+  distinguished by `stepsTrained`.
+- The bimodal readout goes to `--signal` when it fires, because that is the
+  moment worth looking at.
+
+### Surprise
+
+`analogous` and `warmer` both peak at 23 degrees rather than 30 and 13.5. That is
+the bin spacing, not an error: hue cells sit every 22.5 degrees, so the reported
+hump is the loudest cell, not the interpolated answer. The interpolated answer is
+what `decode()` returns and what the hue error metric uses. Worth knowing before
+someone asks why the label says 23.
