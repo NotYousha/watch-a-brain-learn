@@ -727,3 +727,21 @@ body.abmode #controls { display: none; }
    :first-of-type matches by element type, and the first div in the
    column is the header, not a row. */
 .abmode { margin-bottom: auto; }
+
+/* ---- attribution -----------------------------------------
+   On screen for the entire talk, quiet enough not to compete with
+   the data and legible enough to actually be read. */
+
+#hdr .credit {
+  font-size: var(--t-meta);
+  color: var(--text-lo);
+}
+
+#hdr .credit a {
+  color: var(--text-mid);
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 2px;
+}
+
+#hdr .credit a:hover { color: var(--text-hi); }

@@ -83,7 +83,17 @@ node _verify_ui.js   # runs the page under a fake DOM, drives every button
 ```
 
 Neither is part of the student project — they're here so you can confirm
-nothing rotted before class. Both should run in a couple of seconds.
+nothing rotted before class.
+
+Budget about **30 seconds for the pair**, not a couple of seconds as this file
+used to claim. `_verify.js` is the slow one at roughly 13 seconds, because it
+performs 32 full training runs of 4000 examples each: every relation twice, a
+sweep of five hidden-layer sizes, eight parameter extremes, and six points on the
+lesion curve. `_verify_ui.js` takes roughly 15 seconds, most of it walking the
+twelve tutorial stops and building two brains for A/B mode.
+
+Both print as they go, so you can tell the difference between slow and hung. If
+either takes more than about a minute, something is wrong.
 
 ## What's actually under the hood
 

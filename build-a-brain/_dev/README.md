@@ -692,3 +692,75 @@ robust.
 
 `lesion-comparison.svg` is committed for use on a slide, 820 by 400, self
 contained, no fonts to load.
+
+---
+
+## Phase 9: attribution, docs, cleanup
+
+### The licence position
+
+`LICENSE-NOTE.md` at the repository root, not `LICENSE.md`. The name matters:
+GitHub's licence detector reads `LICENSE*` and a file called `LICENSE.md` would
+make the repository look licensed when it is not. The note states plainly that
+upstream carries no licence, that all rights are therefore reserved by Kara Codex,
+that this fork exists only under GitHub's Terms of Service, and that permission is
+being sought and has not been granted. It also lists exactly which files came from
+upstream and which were added here. No licence was invented.
+
+### The upstream pull request branch
+
+Branch `pr/neuron-view`, one commit on top of `origin/main`, 821 insertions across
+seven files. `brain.js` and `colors.js` untouched. Verified with both verifiers on
+that branch.
+
+Two things were deliberately stripped that the original `427f7e8` commit carried:
+
+- The fork's root `README.md` and root `index.html`. The README opens with "This
+  is a fork" and the index is a GitHub Pages redirect. Neither means anything
+  upstream.
+- Every personal value in `config.js`. The original commit changed `ownerName` to
+  Yousha, `brainName` to Brian, and eight tuning values, all mixed into the same
+  commit as the genuine `trainSpeed` hook. The PR branch keeps upstream's student
+  defaults and adds only `trainSpeed`. Sending someone else's workshop back to
+  them with your own name baked into the template would be a poor look.
+
+The description is in `_dev/pr-neuron-view.md`, including a note flagging the
+`think()` array reuse for the reviewer, since that is the one place the view
+contains arithmetic that looks duplicated.
+
+### TEACHER.md corrected
+
+It claimed both verifiers run "in a couple of seconds". Measured: `_verify.js` is
+about 13 seconds and `_verify_ui.js` about 15. The file now says budget 30 seconds
+for the pair and explains why, which is 32 full training runs in the first and the
+twelve tutorial stops plus two A/B brains in the second.
+
+Note this is the opposite of what the brief assumed. The brief expected
+`_verify_ui.js` to be the slow one at 15 seconds and blamed slow-speed frames. At
+phase 0 it was the faster of the two at 5.6 seconds. It has since grown to about
+15 because of everything phases 1 to 6 added to it, so the brief's number is now
+right by coincidence rather than by diagnosis.
+
+### Verifier coverage
+
+`_verify_ui.js` now covers, and fails on, all of the new surfaces:
+
+- both pages' element ids checked against every script each page loads
+- the presenter shell boots and every keyboard binding is driven
+- all twelve tutorial stops resolve a target, interpolate every placeholder, and
+  escape restores the exact example count and relation
+- the lesion mask is repeatable, nested and fully reversible, and the curve has
+  the right shape at 0, 40 and 95 per cent
+- A/B mode builds two distinct brains, both see an identical number of examples,
+  and all five presets build
+- **all six** relations switch, retrain and produce both a score and a vote
+  readout. Previously only three were spot-checked.
+- the held-out probes are provably held out, and held-out error converges
+- the confidence widget's central claim: complement unimodal, triadic bimodal,
+  and ambiguity collapsing confidence
+
+### Attribution on screen
+
+`Original workshop by Kara Codex`, linked to the upstream repository, in the
+presenter header. It is in the header rather than a footer specifically so it
+cannot scroll away, and the header is on screen for the entire talk.

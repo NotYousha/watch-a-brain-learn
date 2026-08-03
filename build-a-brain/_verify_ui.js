@@ -328,10 +328,23 @@ if (presScripts) (async () => {
   if (!pe.pLesion._focused) throw new Error('l did not focus the lesion slider');
   console.log('l:           lesion slider focused');
 
-  for (const n of ['1', '3', '5']) {
-    key(n);
-    p.pump(40);
-    console.log('key ' + n + ':       ' + pe.status.textContent.slice(0, 62));
+  /* All six relations must switch, retrain and read out cleanly, not
+     just the three that were spot-checked. Keys 1 to 6 in order. */
+  for (let i = 1; i <= 6; i++) {
+    key(String(i));
+    p.pump(120);
+    const want = g.Colors.relationNames[i - 1];
+    if (pe.pRelation.value !== want) {
+      throw new Error('key ' + i + ' selected ' + pe.pRelation.value + ', expected ' + want);
+    }
+    if (!pe.mScore.textContent || pe.mScore.textContent === '—') {
+      throw new Error('relation ' + want + ' produced no score');
+    }
+    if (!pe.mMode.textContent || /\{/.test(pe.mMode.textContent)) {
+      throw new Error('relation ' + want + ' produced no vote readout');
+    }
+    console.log('  key ' + i + ' ' + want.padEnd(17) + 'score ' + pe.mScore.textContent.padStart(3) +
+                ' | hue ' + pe.mHue.textContent.padStart(6) + ' | ' + pe.mMode.textContent);
   }
 
   // Back to a trained brain, then drive the lesion slider. It
