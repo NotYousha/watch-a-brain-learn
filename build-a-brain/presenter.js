@@ -605,6 +605,22 @@
     firingCount: () => Shared.firingCount(brain),
     wiring: () => Shared.wiringSpread(brain),
     drives: () => NeuronView.drives(brain, selected),
+
+    /* How many cells are sitting right on the homeostatic cap. The
+       ablation in _dev/experiments.js shows removing the cap costs
+       only about a point, so it is worth being able to say on screen
+       that it is nonetheless binding constantly. */
+    cellsAtCap() {
+      let n = 0;
+      for (let j = 0; j < brain.nHid; j++) {
+        let norm = 0;
+        const base = j * brain.nOut;
+        for (let o = 0; o < brain.nOut; o++) norm += brain.Who[base + o] * brain.Who[base + o];
+        if (Math.sqrt(norm) > 0.999) n++;
+      }
+      return n;
+    },
+
     confidencePercent: () => Math.round(reading().e.confidence * 100),
     voteSeparation() {
       const m = reading().mode;

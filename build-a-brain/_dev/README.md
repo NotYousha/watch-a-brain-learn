@@ -555,3 +555,77 @@ comparison live while the claim is still on screen.
   number key, so the label could disagree with the two brains on screen.
 - `.abrow:first-of-type` matched nothing, because `:first-of-type` matches by
   element type and the first div in a column is the header, not a row.
+
+---
+
+## Phase 7: experiment harness
+
+`_dev/experiments.js` writes `_dev/results.json` and `RESULTS.md`. Total runtime
+110.6 seconds, inside the two-minute target. Slowest is seed variance at 36.5s,
+which is 120 full training runs and cannot be helped.
+
+### Reproducibility, per the decision recorded in phase 0
+
+Every experiment runs inside `withSeed()`, which swaps the global `Math.random`
+for a seeded xorshift and restores it in a `finally` block, so a thrown experiment
+cannot leave a seeded generator installed. All six relations are reproducible,
+including `triadic` and `split-complement` whose coin flip lives inside `apply()`.
+No shipped file is touched.
+
+### Two ablations config cannot express
+
+k winners take all and sparse wiring are both reachable through config. The
+homeostatic cap and the mean input subtraction are single lines inside `brain.js`,
+so those are ablated by patching a copy of the source string in memory and loading
+that. The shipped file is never written to. Each patch asserts it matched, so if
+`brain.js` changes and a needle stops applying, the harness throws instead of
+quietly reporting the baseline twice.
+
+### Results that matter, in order
+
+**Confidence correlates with hue error at r = -0.97 across 100 runs.** This is the
+result worth leading with. A usable uncertainty estimate, from a network with no
+loss function, no target comparison and no error signal anywhere.
+
+**Seed 7 was not lucky.** `complement` is 85.3 ± 1.2 across 20 seeds, range 84 to
+88.
+
+**chromaFraction 0.40 earned its place.** Best of the four tested: 83.0, 85.3,
+82.9, 79.6 for 0.2, 0.4, 0.6, 0.8.
+
+**Redundancy scales with size.** At 256 neurons, killing 40 per cent costs 0.9
+points and 95 per cent still leaves 49.9. At 96 neurons the same cuts cost 7.4 and
+leave 34.8.
+
+**forgetting is free up to 0.001 and costs 3 points at 0.01.**
+
+### Three findings against the write-up
+
+1. **The homeostatic cap does almost nothing.** `brain.js` says "Without this the
+   brain collapses into shouting the same answer at everything". Removing it costs
+   0.9 points. It is not idle: 103 of 256 cells sit pressed against it. It binds
+   constantly and still barely matters, because the hue readout is a weighted
+   circular mean that divides by total weight and is therefore largely blind to
+   how big any one cell's weights became. Removing the cap and the competition
+   together still gives 79.0. The predicted collapse does not happen.
+2. **Sparse wiring does not help the score.** Dense wiring scores 86.5 against
+   85.3, which is better. It costs 0.3 degrees of hue precision. The claim that
+   full connectivity makes all cells respond identically is false here: every cell
+   still gets independent signed random weights.
+3. **Competition is the largest single ablation at 5.2 points, and still not a
+   collapse.** What prevents runaway without it is the last line of `think()`,
+   which divides the layer by its own total activity.
+
+Tour stops 7, 8 and 10 were reworded to match all three, because A/B mode lets
+anyone in the room check them live.
+
+### A correction to phase 4's note in this file
+
+Phase 4 concluded from a single seed that lesion damage does not recover. Ten
+seeds says that was too strong. At 50 and 80 per cent there is nothing to recover,
+but at 90 per cent retraining regains 4.3 points and at 95 per cent 5.7, which is
+about 19 and 16 per cent of what was lost. Small, consistent, not zero. The
+ceiling is still explained by `Wih` being fixed at birth.
+
+The brief's experiment 6 specified 50 per cent only, which can return nothing but a
+null result. It runs at 50, 80, 90 and 95.

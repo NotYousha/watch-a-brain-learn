@@ -143,11 +143,15 @@ const Tour = {
       target: '#metrics',
       title: 'Why it does not collapse',
       body: 'A cell that fires more gets stronger wires, which makes it ' +
-            'fire more. Left alone, one cell ends up answering every ' +
-            'colour identically and the score sits at nothing. Two brakes ' +
-            'stop that. The contest you just saw, and a cap on how much ' +
-            'total wire strength any one cell is allowed. Biology calls ' +
-            'the second one homeostasis.',
+            'fire more, and something has to stop that running away. ' +
+            'Three things do. The contest you just saw, which is worth ' +
+            'about five points. A cap on how much total wire strength any ' +
+            'one cell may hold, which {atCap} of the 256 cells are pressed ' +
+            'against at this moment. And the whole layer being divided by ' +
+            'its own total activity, so it fires with the same energy no ' +
+            'matter how many cells won. Measured: removing the cap costs ' +
+            'about one point, removing the contest costs five. Biology has ' +
+            'all three.',
       code: 'brain.js:320   if (norm > 1) ... /= norm',
       pause: true
     },
@@ -198,6 +202,7 @@ const Tour = {
     poolSize: (ctx) => String(ctx.drives().of),
     winners:  (ctx) => String(ctx.drives().winners),
     sep:      (ctx) => ctx.voteSeparation(),
-    conf:     (ctx) => ctx.confidencePercent()
+    conf:     (ctx) => ctx.confidencePercent(),
+    atCap:    (ctx) => String(ctx.cellsAtCap())
   }
 };
