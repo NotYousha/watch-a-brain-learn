@@ -865,11 +865,22 @@ a projector.
 
 Two things found while building it:
 
-- The crowd view got *worse* on the first attempt. `viz.js` sizes its two pools by
-  `min(w * 0.16, h * 0.19)`, so giving the pane more width and less height
-  collapsed both pools into small blobs. Big mode now puts a 190px floor under the
-  crowd view, which keeps the pools legible while the cell still takes the larger
-  share.
+- The crowd view got *worse* on the first two attempts, and the reason is worth
+  writing down: **width was never what made it look open.** `viz.js` spreads the
+  input and output columns over 80 per cent of the canvas *height*, and sizes each
+  pool by `min(w * 0.16, h * 0.19)`. Height is the binding term at any sane width.
+  A wide, short canvas therefore jams all 28 input cells into a short strip and
+  shrinks both pools to blobs, which looked worse than the normal layout even
+  though the pane was twice as wide. A 190px floor was not enough either.
+
+  Fixed by having big mode give away the height rather than only the width: the
+  metric row and the control row are hidden too, not just the grid. The crowd view
+  then gets about 420px at a 900px viewport and about 640px at 1080p, against the
+  190px of the first attempt, and the single cell sits under it at a fixed 260px,
+  which is the same shape the original lab UI uses. Everything returns on the
+  second press of `b`.
+
+  The lesson generalises: for `viz.js`, openness is a function of height alone.
 - The soma does not get bigger, and cannot without editing `neuronview.js`. Its
   radius is `max(16, min(h * 0.19, 46))` and the normal layout is already at the
   46px cap. What grows is everything around it: dendrites are about 410px long in

@@ -756,13 +756,22 @@ body.abmode #controls { display: none; }
    at 46px and is already at that cap in the normal layout. What gets
    bigger is everything around it. */
 
-body.bigmode #gridPane { display: none; }
+/* Width was never the problem. viz.js spreads the input column over
+   80 per cent of the canvas HEIGHT, and sizes each pool by
+   min(w * 0.16, h * 0.19), so a short canvas jams everything toward
+   the middle however wide it is. The original lab UI looks open
+   because it gives that canvas about 560px of height.
+
+   So big mode gives the height away: the metric row and the control
+   row go too, not just the grid. Everything comes straight back on the
+   second press of b. */
+body.bigmode #gridPane,
+body.bigmode #metrics,
+body.bigmode #controls { display: none; }
 
 body.bigmode #main { grid-template-columns: 1fr; }
 
-/* The single cell carries the fine detail, so it takes most of the
-   extra height. The crowd view keeps a floor, because viz.js sizes its
-   two pools by min(w * 0.16, h * 0.19): starve it of height and the
-   pools collapse into small blobs no matter how wide the pane is. */
-body.bigmode #net  { flex: 1; min-height: 190px; }
-body.bigmode #cell { flex: 2; min-height: 250px; }
+/* Same proportions as the lab UI: the crowd view takes all the height
+   that is going, and the single cell sits under it at a fixed height. */
+body.bigmode #net  { flex: 1; min-height: 260px; }
+body.bigmode #cell { flex: none; height: 260px; min-height: 260px; }

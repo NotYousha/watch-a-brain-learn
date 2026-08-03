@@ -66,7 +66,7 @@ projector. Check the bottom row of buttons is still visible after zooming.
 | `s` | show it one example and stop |
 | `r` | reset every learned weight to blank |
 | `l` | focus the lesion slider, then arrow keys to drag it |
-| `b` | bigger: the network takes over the grid's half of the screen. Safe to press mid-run |
+| `b` | bigger: the network gets the whole screen, hiding the grid, metrics and lesion row. Safe to press mid-run |
 | `t` | the twelve-stop guided tutorial |
 | `a` | A/B mode, two brains with one difference |
 | `1` to `6` | switch which relation it learns, retraining from scratch |

@@ -737,10 +737,11 @@
 
     Viz.resize();
     NeuronView.resize();
+    sizeVotes();          // the metric row is hidden in big mode
     // Repaint the grid only when it is back on screen. While it is
     // hidden the re-render is skipped entirely, which hands its frame
     // budget to the bigger canvases.
-    if (!on) renderGrid();
+    if (!on) { renderGrid(); refresh(); }
     draw();
     if (TourUI.live) TourUI.reflow();
   }
@@ -752,8 +753,8 @@
     }
     setBig(!bigMode);
     say(bigMode
-      ? 'network enlarged, training untouched'
-      : 'back to the held-out grid');
+      ? 'network has the whole screen, training untouched. b to come back'
+      : 'back to the grid and the metrics');
   }
 
   /* ---- the help overlay ------------------------------------ */
@@ -860,6 +861,10 @@
         break;
       case 'l': case 'L':
         ev.preventDefault();
+        // The control row is hidden in big mode, so focusing the slider
+        // there would leave the arrow keys working on something nobody
+        // can see. Come back out first.
+        if (bigMode) setBig(false);
         $('pLesion').focus();
         say('lesion slider focused, use the arrow keys');
         break;
