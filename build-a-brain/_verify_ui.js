@@ -124,7 +124,8 @@ function harness(pageHtml) {
       const ret = '\nreturn { Colors, Brain, Viz, NeuronView, CONFIG, Shared,' +
         ' Probes: typeof Probes !== "undefined" ? Probes : null,' +
         ' Tour: typeof Tour !== "undefined" ? Tour : null,' +
-        ' TourUI: typeof TourUI !== "undefined" ? TourUI : null };';
+        ' TourUI: typeof TourUI !== "undefined" ? TourUI : null,' +
+        ' AB: typeof AB !== "undefined" ? AB : null };';
       return new Function('document', 'window', 'requestAnimationFrame', src + ret)(
         document, window, requestAnimationFrame);
     },
@@ -401,6 +402,39 @@ if (presScripts) (async () => {
   if (!pe.tourCard.hidden || !pe.spot.hidden) throw new Error('the tour did not close');
   console.log('tour: all ' + Stops.stops.length + ' stops resolved, esc restored ' +
               wasSteps + ' examples on ' + wasRel);
+
+  /* ---- A/B mode --------------------------------------------
+     Two real brains, and both must see the same examples in the same
+     order. If the streams drift the comparison is noise and someone
+     in the room will say so. */
+
+  const ABm = g.AB;
+  key('a');
+  if (!ABm.live) throw new Error('a did not open A/B mode');
+  if (!ABm.side.a.brain || !ABm.side.b.brain) throw new Error('A/B did not build two brains');
+  if (ABm.side.a.brain === ABm.side.b.brain) throw new Error('A/B is showing one brain twice');
+
+  ABm.toggleRun();
+  p.pump(1500);
+  const sa = ABm.side.a.brain.stepsTrained, sb = ABm.side.b.brain.stepsTrained;
+  if (sa !== sb) throw new Error('A saw ' + sa + ' examples and B saw ' + sb);
+  if (sa === 0) throw new Error('A/B trained nothing');
+  console.log('A/B: two brains, both at ' + sa + ' identical examples | A score ' +
+              ABm.side.a.score.textContent + ' hue ' + ABm.side.a.hue.textContent +
+              ' | B score ' + ABm.side.b.score.textContent + ' hue ' + ABm.side.b.hue.textContent);
+
+  for (let i = 0; i < ABm.PRESETS.length; i++) {
+    ABm.load(i);
+    if (!ABm.side.a.brain || !ABm.side.b.brain) {
+      throw new Error('preset ' + ABm.PRESETS[i].id + ' failed to build');
+    }
+  }
+  console.log('A/B: all ' + ABm.PRESETS.length + ' presets build two brains and a shared stream');
+
+  key('Escape');
+  if (ABm.live) throw new Error('escape did not leave A/B mode');
+  if (!pe.ab.hidden) throw new Error('A/B section stayed visible');
+  console.log('A/B: escape returns to the single brain');
 
   key('r');
   console.log('r reset:     ' + pe.status.textContent);

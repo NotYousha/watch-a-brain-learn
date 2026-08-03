@@ -83,6 +83,19 @@
 
   </main>
 
+  <section id="ab" hidden>
+    <div class="abbar">
+      <select id="abPreset" aria-label="which comparison to run"></select>
+      <button id="abRun">Run both</button>
+      <button id="abReset">Reset both</button>
+      <span class="mono" id="abStream"></span>
+      <span class="mono"><b id="abCount">0</b> fed</span>
+      <span class="spacer"></span>
+      <span class="mono" id="abNote"></span>
+    </div>
+    <div id="abCols"></div>
+  </section>
+
   <section id="controls">
     <div class="lesionwrap">
       <label for="pLesion">kill <b id="pLesLabel">0</b>% of the neurons</label>
@@ -158,6 +171,7 @@
 <script src="probes.js"></script>
 <script src="viz.js"></script>
 <script src="neuronview.js"></script>
+<script src="ab.js"></script>
 <script src="tour.js"></script>
 <script src="tour-ui.js"></script>
 <script src="presenter.js"></script>

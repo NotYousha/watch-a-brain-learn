@@ -651,6 +651,37 @@
     }
   };
 
+  /* ---- what A/B mode is allowed to do ---------------------- */
+
+  const abCtx = {
+    say,
+    relationName: () => relation,
+    baseConfig: () => CONFIG,
+    voteProbe: () => VOTE_PROBE,
+    speedIndex: () => speedIdx,
+    pauseTraining() { trainer.pause(); setTrainLabel(false); },
+    showAB(on) {
+      $('ab').hidden = !on;
+      document.body.classList[on ? 'add' : 'remove']('abmode');
+      $('pAB').setAttribute('aria-pressed', String(on));
+      if (!on) {
+        // Coming back to one brain: the singletons were never pointed
+        // at the A/B brains, but the canvases have been display:none,
+        // so they need remeasuring before anything draws.
+        Viz.resize();
+        NeuronView.resize();
+        sizeVotes();
+        refresh();
+        renderGrid();
+      }
+    }
+  };
+
+  function toggleAB() {
+    if (AB.live) AB.close();
+    else AB.open();
+  }
+
   /* ---- the help overlay ------------------------------------ */
 
   const KEYMAP = [
@@ -691,6 +722,7 @@
   $('pRelation').addEventListener('change', (ev) => switchRelation(ev.target.value));
   $('pLesion').addEventListener('input', (ev) => onLesionInput(Number(ev.target.value)));
   $('pTour').addEventListener('click', toggleTour);
+  $('pAB').addEventListener('click', toggleAB);
   $('pHelp').addEventListener('click', () => { $('help').hidden = !$('help').hidden; });
   $('help').addEventListener('click', closeOverlays);
 
@@ -720,6 +752,10 @@
       TourUI.key(ev);
       return;
     }
+
+    /* A/B mode takes space, escape and the number keys, but leaves
+       't', 'a' and '?' alone so they still work from in there. */
+    if (AB.live && AB.key(ev)) return;
 
     if (ev.key === 'Escape') {
       closeOverlays();
@@ -752,7 +788,7 @@
         say('lesion slider focused, use the arrow keys');
         break;
       case 'a': case 'A':
-        say('A/B mode arrives in phase 6');
+        toggleAB();
         break;
       case 't': case 'T':
         toggleTour();
@@ -841,6 +877,7 @@
   paintStatic();
   drawLesionChart();
   TourUI.init(tourCtx);
+  AB.init(abCtx);
   refresh();
   renderGrid();
   say('ready. press space to train, ? for keys');
@@ -855,6 +892,13 @@
   /* presenter.html#tour opens the tutorial on load, and #tour3 opens
      it at stop 3. Used by the headless checks, and useful for
      rehearsing one stop without clicking through the others. */
+  /* presenter.html#ab opens A/B mode, and #ab3 opens preset 3. */
+  if (typeof location !== 'undefined' && /^#ab\d*$/.test(location.hash)) {
+    const which = parseInt(location.hash.slice(3), 10);
+    if (which >= 1) AB.preset = which - 1;
+    toggleAB();
+    AB.toggleRun();
+  }
   if (typeof location !== 'undefined' && /^#tour\d*$/.test(location.hash)) {
     const at = parseInt(location.hash.slice(5), 10);
     TourUI.enter();

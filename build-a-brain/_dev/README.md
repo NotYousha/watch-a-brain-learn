@@ -487,3 +487,71 @@ whether audio plays or not, so rewording `tour.js` changes both at once.
 `presenter.html#tour` opens the tutorial on load and `#tour7` opens it at stop 7,
 which is how the stops were screenshot-checked and is useful for rehearsing one
 stop without clicking through the others.
+
+---
+
+## Phase 6: A/B split screen
+
+New `ab.js`. Two brains, one config difference, one stream.
+
+### Synchronisation is structural, not hopeful
+
+The stream is generated once into an array, and a single `Shared.Trainer` hands
+each example to both brains inside one `onExample`. There are not two loops that
+happen to agree. Seeding both brains identically would not have been enough: per
+phase 0 finding 2, the example stream comes from `Math.random()`, so same-seed
+brains get identical wiring and then diverge. `_verify_ui.js` asserts both brains
+report the same `stepsTrained` after a run.
+
+The crowd view and neuron view are not drawn in this mode, which the brief already
+wanted for space reasons and which phase 0 independently required: `Viz` and
+`NeuronView` are singletons holding one layout and one spotlight, so pointing them
+at two brains would have them fight.
+
+### Two of the brief's acceptance criteria do not hold
+
+Measured at 4000 examples on `complement`, both brains fed the identical stream:
+
+| preset | A | B | difference |
+|---|---|---|---|
+| chromaFraction 0.40 vs 0.80 | 85, 3.3 deg | 78, 2.3 deg | A wins by 7 on score |
+| fireFraction 0.05 vs 1.0, competition off | 86, 3.3 deg | 79, 6.2 deg | A wins by 7 |
+| connectivity 0.15 vs 1.0, dense wiring | 85, 3.3 deg | 85, 5.2 deg | no score difference |
+| hiddenNeurons 256 vs 96 | 85, 3.3 deg | 81, 7.0 deg | A wins by 4 |
+| forgetting 0 vs 0.001 | 85, 3.3 deg | 85, 3.4 deg | none |
+
+The brief expected the competition-off preset to "visibly collapse one side" and
+the dense-wiring preset to "visibly degrade one side". Neither happens.
+
+**Competition off costs about 7 points, it does not collapse.** With
+`fireFraction` at 1.0 the k winners threshold becomes the minimum, so nothing is
+silenced and all 256 cells fire. The reason it survives is that competition is not
+the only brake in `think()`: the final line divides the whole layer by its total
+activity, so the layer always fires with the same total energy no matter how many
+cells are involved. That energy normalisation does a lot of the work people
+attribute to the contest. Worth knowing, because it is a better answer to "what
+stops it collapsing" than the tutorial's original one.
+
+**Dense wiring does not degrade the score at all.** It costs precision on hue,
+3.3 degrees to 5.2, and nothing on score. The tutorial's original claim, that with
+full connectivity "all 256 would respond identically and you would have paid for
+256 neurons and built one, copied", is simply false for this implementation: even
+at full connectivity every cell gets its own independent signed random weights, so
+the cells still differ from each other. They differ less usefully, which is what
+the hue error shows.
+
+Both tour stops were reworded to say what the numbers actually support. That
+matters more than usual here, because A/B mode lets anyone in the room run the
+comparison live while the claim is still on screen.
+
+### One confirmed answer to an open question
+
+`chromaFraction` 0.40 does earn its place, at least against 0.80: 85 against 78 on
+`complement`. Phase 7 sweeps it properly across four values and ten seeds.
+
+### Fixed during this phase
+
+- The preset dropdown did not resync when the preset was set from a URL hash or a
+  number key, so the label could disagree with the two brains on screen.
+- `.abrow:first-of-type` matched nothing, because `:first-of-type` matches by
+  element type and the first div in a column is the header, not a row.

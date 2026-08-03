@@ -592,3 +592,138 @@ a:focus-visible {
 }
 
 #tourNext { background: var(--signal); color: var(--ink-0); border-color: var(--signal); }
+
+/* ---- A/B mode --------------------------------------------
+   #main and #ab share grid row 3, and only one of them is ever
+   displayed. The metric row and the control row collapse to nothing
+   because an auto-sized grid row with a display:none item has no
+   height. */
+
+#hdr      { grid-row: 1; }
+#metrics  { grid-row: 2; }
+#main     { grid-row: 3; }
+#ab       { grid-row: 3; }
+#controls { grid-row: 4; }
+#buttons  { grid-row: 5; }
+
+#ab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-height: 0;
+}
+
+#ab[hidden] { display: none; }
+
+body.abmode #metrics,
+body.abmode #main,
+body.abmode #controls { display: none; }
+
+.abbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.abbar .mono {
+  font-size: var(--t-meta);
+  color: var(--text-mid);
+}
+
+.abbar .mono b { color: var(--signal); font-weight: 500; }
+
+#abNote {
+  color: var(--text-lo);
+  text-align: right;
+}
+
+#abCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+  min-height: 0;
+  flex: 1;
+}
+
+.abcol {
+  background: var(--ink-1);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 10px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.abhead2 {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.abbadge {
+  font-family: var(--mono);
+  font-size: var(--t-body);
+  font-weight: 600;
+  color: var(--ink-0);
+  background: var(--signal);
+  border-radius: 4px;
+  padding: 1px 9px;
+}
+
+.abwhat {
+  font-size: var(--t-title);
+  color: var(--text-hi);
+}
+
+.abmets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.abmet label {
+  display: block;
+  font-size: var(--t-meta);
+  color: var(--text-mid);
+}
+
+.abvalue {
+  font-size: 28px;
+  line-height: 1.15;
+  color: var(--signal);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.abvotes {
+  width: 100%;
+  height: 44px;
+  display: block;
+}
+
+.abmode {
+  font-size: var(--t-meta);
+  color: var(--text-mid);
+}
+
+.abrow > label {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--t-meta);
+  color: var(--text-mid);
+  margin-bottom: 2px;
+}
+
+.abstrip {
+  height: clamp(34px, 7vh, 88px);
+}
+
+/* Push the three strips to the bottom of the column so it is not
+   half empty. Note this cannot be done with .abrow:first-of-type:
+   :first-of-type matches by element type, and the first div in the
+   column is the header, not a row. */
+.abmode { margin-bottom: auto; }

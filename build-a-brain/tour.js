@@ -103,9 +103,10 @@ const Tour = {
       title: 'Only {firing} of 256 fire',
       body: 'Each group runs its own contest and everything else is ' +
             'forced to zero. Not because it was wrong. Because it was not ' +
-            'the loudest. This is called k winners take all, and without ' +
-            'it one loud cell would end up answering every colour the same ' +
-            'way.',
+            'the loudest. This is called k winners take all. Switch it off ' +
+            'so that all 256 fire at once and it still learns, but worse: ' +
+            'the score drops about seven points and the answers blur. You ' +
+            'can run that comparison live in A/B mode.',
       pause: true
     },
 
@@ -113,11 +114,13 @@ const Tour = {
       id: 'sparse',
       target: '#chipWiring',
       title: 'Each cell hears only {inMin} to {inMax} of the 28',
-      body: 'If every cell heard every input, all 256 would respond ' +
-            'identically and you would have paid for 256 neurons and built ' +
-            'one, copied. The wiring is sparse and random, and it is fixed ' +
-            'at birth. It never learns. That randomness is what makes each ' +
-            'cell an accidental specialist in something different.',
+      body: 'Those inputs are picked at random and fixed at birth. The ' +
+            'wiring never learns. That randomness is what makes every cell ' +
+            'an accidental specialist in a different combination of things. ' +
+            'Wire them all to everything instead and it still scores about ' +
+            'the same, but the answers get measurably less precise, because ' +
+            'the cells stop being different from each other. A/B mode will ' +
+            'show you that one too.',
       pause: true
     },
 
