@@ -511,14 +511,14 @@
       <p class="eyebrow rise" style="--i:0">Training</p>
       <h2 class="rise" style="--i:1">How does it learn?</h2>
       <ol class="steps rise" style="--i:2">
-        <li><span>The correct complementary colour is given at the same time,
-            as the <b>target</b>.</span></li>
-        <li><span>The active neurons and the correct output are on at the
-            <b>same moment</b>.</span></li>
-        <li><span>So the connections between them get
-            <b>slightly stronger</b>.</span></li>
-        <li><span>Repeat about <b>4,000 times</b>, with many different
-            colours.</span></li>
+        <li><span>It sees blue. One group of <b>colour</b> neurons and one group
+            of <b>brightness</b> neurons become active.</span></li>
+        <li><span>The correct complementary colour is switched on at the
+            <b>same time</b>.</span></li>
+        <li><span>Neurons that fire together wire together, so those
+            connections get <b>stronger</b>.</span></li>
+        <li><span>After thousands of examples, it has learned which
+            <b>patterns</b> go with which colours.</span></li>
       </ol>
     </div>
     <div class="col">
@@ -533,9 +533,8 @@
         </figure>
       </div>
       <p class="kicker rise" style="--i:3">
-        <strong>Hue error</strong> is how many degrees the answer is away from the
-        correct colour. Close to random before training, down to
-        <strong>a few degrees</strong> after.
+        <strong>Hue error</strong> is how far off the answer is. That is why it
+        gets smaller as it learns, and <strong>the score goes up</strong>.
       </p>
     </div>
   </section>
