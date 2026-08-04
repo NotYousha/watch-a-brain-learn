@@ -971,6 +971,23 @@
      the projector before the room fills up. */
   if (typeof location !== 'undefined' && /(^|[#,+])big/.test(location.hash)) setBig(true);
 
+  /* presenter.html#kill50 trains a full run straight away, without the
+     animation, and then kills 50 per cent. It is the "show me the state
+     I am about to demo" hook, for rehearsing and for screenshots. The
+     training has to happen before the mask, or you would be training a
+     network that was already damaged. */
+  if (typeof location !== 'undefined') {
+    const kill = /(^|[#,+])kill(\d+)/.exec(location.hash);
+    if (kill) {
+      for (let i = 0; i < CONFIG.trainingExamples; i++) brain.learn(Probes.example(relation));
+      NeuronView.invalidate();
+      refresh();
+      renderGrid();
+      applyLesionNow(Math.max(0, Math.min(95, Number(kill[2]))));
+      say('trained, then ' + lesionPct + '% killed');
+    }
+  }
+
   if (typeof location !== 'undefined' && /(^|[#,+])train/.test(location.hash)) {
     speedIdx = Shared.SPEEDS.indexOf('fast');
     toggleTrain();

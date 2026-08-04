@@ -904,3 +904,39 @@ Also: the tutorial turns big mode off on entry and restores it on exit, because 
 of its stops point at swatches inside the prediction grid and a hidden element has
 no rectangle to spotlight. Big mode is refused while A/B is up, with a message
 saying to press `a` first.
+
+---
+
+## Added after phase 10: the overview deck
+
+`_dev/overview-deck.html`, five slides, self-contained, also published as an
+artifact. Written from Yousha's own spoken script, so the deck says only what he
+has words for. Palette and type come from `presenter.css` so it belongs to the demo
+it introduces, and the deck is entirely greyscale: every colour in it comes from a
+screenshot of the running network.
+
+Slides: what the project is and what a neural network is, how it sees colour (the
+crowd view labelled with input, colour pathway, brightness pathway, output), inside
+a single neuron (dendrites, soma, axon, terminals), how it learns with hue error
+before and after, and damaging the network at 50 per cent.
+
+New URL hook in `presenter.js`: `#kill50` trains a full run synchronously and then
+applies a 50 per cent mask. It exists because the deck needed a screenshot of the
+exact state being demonstrated, and it doubles as a rehearsal hook. Training has to
+run before the mask or you would be training an already-damaged network.
+
+### Three bugs worth recording
+
+- **`ol.steps li` was a grid container.** With `display: grid` on the `li`, every
+  inline child became its own grid item, so each `<b>` and each text run was placed
+  in a separate cell. The numbered steps came out shattered across the slide. Fixed
+  by wrapping each step's content in a single `<span>`.
+- **The annotated SVG overflowed its grid row.** A replaced element with
+  `height: auto` resolves to its viewBox aspect height regardless of how tall the
+  row actually is, so the bottom label drew on top of the caption below it. Fixed
+  with `max-height` plus `min-height: 0` on the row.
+- **Numbers on a slide disagreed with the screenshot beside them.** The text said
+  86 before and 87 after, because those came from a `--dump-dom` run while the
+  image came from a separate `--screenshot` run, and the two got different
+  `Math.random` streams. The screenshot actually read 85 and 85. Any number written
+  on a slide is now read out of the image that sits next to it.
