@@ -1,0 +1,2499 @@
+<title>Term Drill — AI &amp; Dev Glossary</title>
+
+<style>
+  :root {
+    --ground: #faf8f4;
+    --panel: #ffffff;
+    --sunk: #f0ede6;
+    --edge: #ddd8cc;
+    --edge-hi: #c3bcab;
+    --text: #1b1a17;
+    --dim: #6a675e;
+    --accent: #9a5c12;
+    --accent-soft: #f5e6d0;
+    --ok: #127355;
+    --ok-soft: #ddf0e7;
+    --part: #8a6a08;
+    --part-soft: #f7eecf;
+    --no: #ab2f2f;
+    --no-soft: #f8e2e0;
+
+    /* chart series — validated: light/#fcfcfb surface, all six checks pass */
+    --s1: #1f6fb2;
+    --s2: #c25e00;
+    --grid: rgba(27, 26, 23, 0.09);
+
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #12141c; --panel: #1a1d27; --sunk: #15171f;
+      --edge: #2a2e3b; --edge-hi: #3d4354;
+      --text: #ece9e2; --dim: #8d8a82;
+      --accent: #e8a33d; --accent-soft: #2a2318;
+      --ok: #3fb98a; --ok-soft: #16261f;
+      --part: #d3a63c; --part-soft: #26200f;
+      --no: #e06b6b; --no-soft: #2a1919;
+      --s1: #3f92d8; --s2: #bf8420;
+      --grid: rgba(236, 233, 226, 0.10);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #12141c; --panel: #1a1d27; --sunk: #15171f;
+    --edge: #2a2e3b; --edge-hi: #3d4354;
+    --text: #ece9e2; --dim: #8d8a82;
+    --accent: #e8a33d; --accent-soft: #2a2318;
+    --ok: #3fb98a; --ok-soft: #16261f;
+    --part: #d3a63c; --part-soft: #26200f;
+    --no: #e06b6b; --no-soft: #2a1919;
+    --s1: #3f92d8; --s2: #bf8420;
+    --grid: rgba(236, 233, 226, 0.10);
+  }
+
+  :root[data-theme="light"] {
+    --ground: #faf8f4; --panel: #ffffff; --sunk: #f0ede6;
+    --edge: #ddd8cc; --edge-hi: #c3bcab;
+    --text: #1b1a17; --dim: #6a675e;
+    --accent: #9a5c12; --accent-soft: #f5e6d0;
+    --ok: #127355; --ok-soft: #ddf0e7;
+    --part: #8a6a08; --part-soft: #f7eecf;
+    --no: #ab2f2f; --no-soft: #f8e2e0;
+    --s1: #1f6fb2; --s2: #c25e00;
+    --grid: rgba(27, 26, 23, 0.09);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 18px 72px; }
+  .wrap.wide { max-width: 940px; }
+
+  .label {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--dim);
+  }
+
+  /* ---------- masthead ---------- */
+  .top { padding: 32px 0 16px; display: flex; flex-direction: column; gap: 8px; }
+  h1 {
+    font-family: var(--mono); font-size: clamp(24px, 5vw, 34px);
+    font-weight: 700; letter-spacing: -0.02em; margin: 0;
+  }
+  h1 .dot { color: var(--accent); }
+  .tagline { color: var(--dim); font-size: 15px; max-width: 60ch; margin: 0; }
+
+  .panel { background: var(--panel); border: 1px solid var(--edge); padding: 20px; }
+
+  button {
+    font: inherit; cursor: pointer; background: none;
+    border: 1px solid var(--edge-hi); color: var(--text);
+    padding: 10px 16px; border-radius: 0;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  button:hover:not(:disabled) { border-color: var(--accent); }
+  button:disabled { cursor: default; opacity: 0.5; }
+  button.primary {
+    background: var(--accent); border-color: var(--accent); color: var(--ground);
+    font-family: var(--mono); font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase; font-size: 13px; padding: 13px 22px;
+  }
+  button.primary:hover:not(:disabled) { filter: brightness(1.12); }
+  button.small {
+    font-family: var(--mono); font-size: 11.5px; padding: 6px 11px;
+  }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .setup { display: flex; flex-direction: column; gap: 24px; }
+  .block { display: flex; flex-direction: column; gap: 10px; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip {
+    font-family: var(--mono); font-size: 12px; padding: 6px 11px;
+    border: 1px solid var(--edge-hi); color: var(--dim);
+    display: flex; align-items: center; gap: 7px;
+  }
+  .chip .n { opacity: 0.6; font-size: 11px; }
+  .chip[aria-pressed="true"] {
+    border-color: var(--accent); background: var(--accent-soft); color: var(--text);
+  }
+  .chip .mast { width: 34px; height: 3px; background: var(--edge); position: relative; overflow: hidden; }
+  .chip .mast i { position: absolute; inset: 0 auto 0 0; background: var(--ok); }
+
+  .modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 8px; }
+  .mode {
+    display: flex; flex-direction: column; gap: 3px; align-items: flex-start;
+    text-align: left; padding: 13px 15px;
+  }
+  .mode strong { font-family: var(--mono); font-size: 13px; font-weight: 700; }
+  .mode span { font-size: 12px; color: var(--dim); line-height: 1.4; }
+  .mode[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+
+  /* ---------- phase rail ---------- */
+  .rail {
+    display: flex; align-items: center; gap: 0; flex-wrap: wrap;
+    padding: 12px 0 0;
+  }
+  .rail .step {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--dim);
+    padding: 4px 10px; border: 1px solid transparent;
+  }
+  .rail .step.on { color: var(--text); border-color: var(--accent); background: var(--accent-soft); }
+  .rail .step.done { color: var(--ok); }
+  .rail .sep { color: var(--edge-hi); font-size: 11px; }
+
+  .hud {
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    padding: 14px 0; border-bottom: 1px solid var(--edge);
+  }
+  .hud .stat { display: flex; flex-direction: column; }
+  .hud .stat b {
+    font-family: var(--mono); font-size: 19px; font-weight: 700;
+    font-variant-numeric: tabular-nums; line-height: 1.1;
+  }
+  .hud .stat b.hot { color: var(--accent); }
+  .hud .spacer { flex: 1; }
+
+  .bar { height: 4px; background: var(--edge); margin-bottom: 22px; }
+  .bar i { display: block; height: 100%; background: var(--accent); transition: width 200ms ease; }
+
+  /* ---------- learn cards ---------- */
+  .card { display: flex; flex-direction: column; gap: 16px; }
+  .card .term {
+    font-family: var(--mono); font-size: clamp(22px, 4.6vw, 30px);
+    font-weight: 700; letter-spacing: -0.01em; line-height: 1.2;
+  }
+  .card .def { font-size: 17px; line-height: 1.6; }
+  .keylist { display: flex; flex-direction: column; gap: 6px; }
+  .keyline {
+    display: grid; grid-template-columns: 18px 1fr; gap: 10px;
+    font-size: 14.5px; align-items: baseline;
+  }
+  .keyline .mk { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+  /* state classes are prefixed: a bare .miss collides with the results row below */
+  .keyline.k-hit .mk { color: var(--ok); }
+  .keyline.k-miss .mk { color: var(--no); }
+  .keyline .kt { line-height: 1.45; }
+  .keyline .got { color: var(--dim); font-family: var(--mono); font-size: 12px; }
+
+  /* ---------- teach mode ---------- */
+  .tcontrols {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 12px 0; border-bottom: 1px solid var(--edge);
+  }
+  .tcontrols .grow { flex: 1; }
+  .tbtn {
+    font-family: var(--mono); font-size: 12px; padding: 7px 12px; min-width: 42px;
+  }
+  .tbtn.play { background: var(--accent); border-color: var(--accent); color: var(--ground); font-weight: 700; }
+  select {
+    font-family: var(--mono); font-size: 12px; padding: 6px 8px;
+    background: var(--sunk); color: var(--text);
+    border: 1px solid var(--edge-hi); border-radius: 0;
+  }
+  .slide { display: flex; flex-direction: column; gap: 22px; padding: 26px 0 8px; }
+  .slide .sterm {
+    font-family: var(--mono); font-size: clamp(26px, 6vw, 40px);
+    font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; margin: 0;
+    text-wrap: balance;
+  }
+  .sblock { display: flex; flex-direction: column; gap: 7px; }
+  .sblock .label { display: flex; align-items: center; gap: 7px; }
+  .plain {
+    font-size: clamp(18px, 3.4vw, 22px); line-height: 1.55; margin: 0;
+    text-wrap: pretty;
+  }
+  .formal {
+    font-size: 15.5px; line-height: 1.6; color: var(--dim); margin: 0;
+    padding-left: 13px; border-left: 2px solid var(--edge-hi);
+  }
+  .speaking { color: var(--accent); }
+  .voicewarn { font-size: 12.5px; color: var(--dim); font-family: var(--mono); }
+
+  /* ---------- question ---------- */
+  .qhead { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .qtag {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent);
+    border: 1px solid var(--accent); padding: 2px 7px;
+  }
+  .qtag.b2 { color: var(--s1); border-color: var(--s1); }
+
+  .prompt { font-size: 20px; line-height: 1.5; margin: 0 0 22px; text-wrap: pretty; }
+  .prompt.term {
+    font-family: var(--mono); font-size: clamp(22px, 4.6vw, 30px);
+    font-weight: 700; letter-spacing: -0.01em;
+  }
+
+  .opts { display: flex; flex-direction: column; gap: 8px; }
+  .opt {
+    display: grid; grid-template-columns: 26px 1fr; gap: 12px;
+    align-items: start; text-align: left; padding: 12px 14px; line-height: 1.45;
+  }
+  .opt kbd {
+    font-family: var(--mono); font-size: 11px; color: var(--dim);
+    border: 1px solid var(--edge); padding: 1px 0; text-align: center;
+    display: block; margin-top: 2px;
+  }
+  .opt .txt { font-size: 15px; }
+  .opt .txt.mono { font-family: var(--mono); font-weight: 600; }
+  .opt[data-state="right"] { border-color: var(--ok); background: var(--ok-soft); }
+  .opt[data-state="wrong"] { border-color: var(--no); background: var(--no-soft); }
+  .opt[data-state="muted"] { opacity: 0.45; }
+
+  .typerow { display: flex; gap: 8px; }
+  input[type="text"], textarea {
+    font-family: var(--mono); font-size: 16px; flex: 1; padding: 13px 14px;
+    background: var(--sunk); color: var(--text);
+    border: 1px solid var(--edge-hi); border-radius: 0;
+    resize: vertical; line-height: 1.5;
+  }
+  textarea { min-height: 92px; width: 100%; }
+  input[type="text"]:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+  .verdict {
+    margin-top: 18px; padding: 16px 18px;
+    border-left: 3px solid var(--edge-hi); background: var(--sunk);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .verdict.right { border-left-color: var(--ok); }
+  .verdict.partial { border-left-color: var(--part); }
+  .verdict.wrong { border-left-color: var(--no); }
+  .verdict .head {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.13em; text-transform: uppercase;
+  }
+  .verdict.right .head { color: var(--ok); }
+  .verdict.partial .head { color: var(--part); }
+  .verdict.wrong .head { color: var(--no); }
+  .verdict .t { font-family: var(--mono); font-weight: 700; font-size: 16px; }
+  .verdict .d { font-size: 14.5px; line-height: 1.55; }
+  .verdict .yours {
+    font-family: var(--mono); font-size: 13.5px; color: var(--dim);
+    padding-left: 11px; border-left: 2px solid var(--edge-hi); line-height: 1.5;
+  }
+  .verdict .sec { font-size: 12px; color: var(--dim); font-family: var(--mono); }
+
+  .footrow { margin-top: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .hint { font-family: var(--mono); font-size: 11.5px; color: var(--dim); }
+  .hint kbd { border: 1px solid var(--edge-hi); padding: 1px 5px; margin: 0 1px; }
+
+  /* ---------- results ---------- */
+  .score { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .score b {
+    font-family: var(--mono); font-size: clamp(44px, 11vw, 68px);
+    font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .misses { display: flex; flex-direction: column; gap: 1px; margin-top: 4px; }
+  .miss {
+    display: grid; grid-template-columns: minmax(120px, 210px) 1fr; gap: 14px;
+    padding: 10px 0; border-bottom: 1px solid var(--edge);
+  }
+  .miss .t { font-family: var(--mono); font-size: 13.5px; font-weight: 700; }
+  .miss .d { font-size: 13.5px; color: var(--dim); line-height: 1.45; }
+  .miss .dirtag {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--dim); display: block; margin-top: 2px;
+  }
+
+  /* ---------- stats ---------- */
+  .figs { display: flex; flex-direction: column; gap: 26px; }
+  .fig { display: flex; flex-direction: column; gap: 4px; }
+  .fig .ftitle { font-size: 15px; font-weight: 600; }
+  .fig .fsub { font-size: 13px; color: var(--dim); line-height: 1.45; }
+  .fig .plot { margin-top: 8px; overflow-x: auto; }
+  .fig svg { display: block; width: 100%; height: auto; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 2px; }
+  .legend span { font-family: var(--mono); font-size: 11.5px; color: var(--dim); display: flex; align-items: center; gap: 6px; }
+  .legend i { width: 10px; height: 10px; display: block; }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px; background: var(--edge); border: 1px solid var(--edge); }
+  .tile { background: var(--panel); padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; }
+  .tile b { font-family: var(--mono); font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .tile span { font-size: 12px; color: var(--dim); line-height: 1.35; }
+
+  table.data { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  table.data th {
+    text-align: left; font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim);
+    font-weight: 400; padding: 0 10px 7px 0; border-bottom: 1px solid var(--edge);
+  }
+  table.data td { padding: 8px 10px 8px 0; border-bottom: 1px solid var(--edge); vertical-align: top; }
+  table.data td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; padding-right: 0; }
+  table.data td.tm { font-family: var(--mono); font-weight: 600; }
+
+  #tip {
+    position: fixed; z-index: 40; pointer-events: none; opacity: 0;
+    transition: opacity 90ms ease;
+    background: var(--panel); border: 1px solid var(--edge-hi);
+    padding: 7px 10px; font-family: var(--mono); font-size: 11.5px;
+    line-height: 1.45; color: var(--text); max-width: 240px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.13);
+  }
+  #tip.on { opacity: 1; }
+  #tip b { font-weight: 700; }
+
+  .hidden { display: none !important; }
+  .nodata { font-size: 14px; color: var(--dim); padding: 18px 0; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  @media (max-width: 560px) {
+    .miss { grid-template-columns: 1fr; gap: 3px; }
+    .hud { gap: 14px; }
+  }
+</style>
+
+<div class="wrap" id="wrap">
+
+  <div class="top">
+    <h1>Term Drill<span class="dot">.</span></h1>
+    <p class="tagline" id="tag"></p>
+  </div>
+
+  <!-- ============ SETUP ============ -->
+  <div id="setup" class="setup">
+
+    <div class="block">
+      <div class="label">1 · What to cram</div>
+      <div class="chips" id="secChips"></div>
+      <div class="row" style="margin-top:2px">
+        <button class="small" id="selAll">All sections</button>
+        <button class="small" id="selNone">Clear</button>
+        <button class="small" id="selWeak">Only what I'm weak on</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="label">2 · How hard</div>
+      <div class="modes" id="runBtns">
+        <button class="mode" data-run="guided" aria-pressed="true">
+          <strong>Teach me first</strong><span id="guidedNote">Ten terms explained in plain English and read aloud, then multiple choice on those ten. Repeat, then the final test.</span>
+        </button>
+        <button class="mode" data-run="full" aria-pressed="false">
+          <strong>Full cram</strong><span>Skips the explaining. Learn 10 · drill both ways until clean · mix every 3rd batch · mock exam at the end.</span>
+        </button>
+        <button class="mode" data-run="drillonly" aria-pressed="false">
+          <strong>Skip the learning</strong><span>Straight to drilling in batches of 10. Use this on a second pass.</span>
+        </button>
+        <button class="mode" data-run="mock" aria-pressed="false">
+          <strong>Mock exam only</strong><span>30 questions, no feedback until the end. Find out where you actually stand.</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="primary" id="btnStart">Start</button>
+      <button id="btnStats">Progress &amp; charts</button>
+      <span class="hint" id="poolNote"></span>
+    </div>
+
+    <div class="panel" style="display:flex;flex-direction:column;gap:11px">
+      <div class="label">Where you stand</div>
+      <div class="tiles" id="standTiles"></div>
+      <div class="hint">A term counts as solid in a direction after <b>2 correct in a row</b>. Both directions must be solid for the term to be mastered.</div>
+    </div>
+  </div>
+
+  <!-- ============ LEARN ============ -->
+  <div id="learn" class="hidden">
+    <div class="hud">
+      <div class="stat"><span class="label">Batch</span><b id="lBatch">1</b></div>
+      <div class="stat"><span class="label">Card</span><b id="lCard">1 / 10</b></div>
+      <div class="spacer"></div>
+      <button class="small" id="lQuit" style="color:var(--dim)">End run</button>
+    </div>
+    <div class="bar" style="margin-top:0"><i id="lProg" style="width:0%"></i></div>
+
+    <div class="rail" id="lRail"></div>
+
+    <div class="card" style="margin-top:20px">
+      <div>
+        <div class="label" id="lSec"></div>
+        <div class="term" id="lTerm"></div>
+      </div>
+      <div class="def" id="lDef"></div>
+      <div>
+        <div class="label" style="margin-bottom:7px">You'll be marked on these ideas</div>
+        <div class="keylist" id="lKeys"></div>
+      </div>
+    </div>
+
+    <div class="footrow">
+      <button class="primary" id="lNext">Next card</button>
+      <span class="hint"><kbd>Enter</kbd> next · <kbd>Esc</kbd> end run</span>
+    </div>
+  </div>
+
+  <!-- ============ TEACH ============ -->
+  <div id="teach" class="hidden">
+    <div class="tcontrols">
+      <button class="tbtn play" id="tPlay">❚❚ Pause</button>
+      <button class="tbtn" id="tBack" title="Previous term">←</button>
+      <button class="tbtn" id="tFwd" title="Next term">→</button>
+      <select id="tSpeed" aria-label="Narration speed">
+        <option value="0.9">0.9×</option>
+        <option value="1" selected>1×</option>
+        <option value="1.25">1.25×</option>
+        <option value="1.5">1.5×</option>
+        <option value="2">2×</option>
+      </select>
+      <button class="tbtn" id="tVoice" aria-pressed="true">🔊 Voice on</button>
+      <span class="grow"></span>
+      <span class="label" id="tCount"></span>
+      <button class="tbtn" id="tQuiz">Quiz these now</button>
+      <button class="tbtn" id="tQuit" style="color:var(--dim)">End</button>
+    </div>
+    <div class="bar" style="margin:0"><i id="tProg" style="width:0%"></i></div>
+
+    <div class="slide">
+      <div>
+        <div class="label" id="tSec"></div>
+        <h2 class="sterm" id="tTerm"></h2>
+      </div>
+      <div class="sblock">
+        <div class="label">In plain terms <span id="tSpk" class="speaking"></span></div>
+        <p class="plain" id="tPlain"></p>
+      </div>
+      <div class="sblock">
+        <div class="label">The definition you'll be marked on</div>
+        <p class="formal" id="tDef"></p>
+      </div>
+      <div class="sblock">
+        <div class="label">You must say</div>
+        <div class="keylist" id="tKeys"></div>
+      </div>
+      <div class="voicewarn hidden" id="tWarn"></div>
+    </div>
+
+    <div class="footrow">
+      <span class="hint"><kbd>Space</kbd> pause · <kbd>←</kbd> <kbd>→</kbd> move · <kbd>Q</kbd> quiz these · <kbd>Esc</kbd> end</span>
+    </div>
+  </div>
+
+  <!-- ============ DRILL ============ -->
+  <div id="drill" class="hidden">
+    <div class="hud">
+      <div class="stat"><span class="label" id="hLabel">Question</span><b id="hQ">1</b></div>
+      <div class="stat"><span class="label">Correct</span><b id="hC">0</b></div>
+      <div class="stat"><span class="label">Streak</span><b id="hS">0</b></div>
+      <div class="stat"><span class="label">Left in batch</span><b id="hL">20</b></div>
+      <div class="spacer"></div>
+      <button class="small" id="btnQuit" style="color:var(--dim)">End run</button>
+    </div>
+    <div class="bar" style="margin-top:0"><i id="prog" style="width:0%"></i></div>
+
+    <div class="rail" id="dRail"></div>
+
+    <div class="qhead" style="margin-top:16px">
+      <span class="qtag" id="qtag"></span>
+      <span class="label" id="qsec"></span>
+    </div>
+
+    <p class="prompt" id="prompt"></p>
+
+    <div class="opts hidden" id="opts"></div>
+
+    <div class="typerow hidden" id="typerow">
+      <input type="text" id="typeIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type the term…">
+      <button class="primary" id="btnCheck">Check</button>
+    </div>
+
+    <div class="hidden" id="defrow">
+      <textarea id="defIn" spellcheck="false" placeholder="Define it in your own words…"></textarea>
+      <div class="footrow" style="margin-top:10px">
+        <button class="primary" id="btnCheckDef">Check</button>
+        <span class="hint"><kbd>Enter</kbd> submit · <kbd>Shift</kbd>+<kbd>Enter</kbd> newline</span>
+      </div>
+    </div>
+
+    <div class="verdict hidden" id="verdict">
+      <span class="head" id="vHead"></span>
+      <div class="keylist hidden" id="vKeys"></div>
+      <div class="yours hidden" id="vYours"></div>
+      <span class="t" id="vTerm"></span>
+      <span class="d" id="vDef"></span>
+      <span class="sec" id="vSec"></span>
+    </div>
+
+    <div class="footrow">
+      <button class="primary hidden" id="btnNext">Next</button>
+      <span class="hint" id="kbHint"></span>
+    </div>
+  </div>
+
+  <!-- ============ BATCH DONE ============ -->
+  <div id="batchdone" class="hidden">
+    <div class="block" style="gap:16px">
+      <div class="label" id="bdLabel">Batch clear</div>
+      <div class="score"><b id="bdPct">0%</b><span style="color:var(--dim);font-size:15px" id="bdLine"></span></div>
+      <div class="rail" id="bRail"></div>
+      <div class="row" style="margin-top:6px">
+        <button class="primary" id="bdNext">Continue</button>
+        <button id="bdEnd">End run here</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ RESULTS ============ -->
+  <div id="done" class="hidden">
+    <div class="block" style="gap:18px">
+      <div class="label" id="rLabel">Run complete</div>
+      <div class="score"><b id="rPct">0%</b><span style="color:var(--dim);font-size:15px" id="rLine"></span></div>
+      <div class="tiles" id="rTiles"></div>
+      <div id="missWrap">
+        <div class="label" style="margin-bottom:6px">Get these before the test</div>
+        <div class="misses" id="misses"></div>
+      </div>
+      <div class="row">
+        <button class="primary" id="btnAgain">Drill the misses</button>
+        <button id="btnStats2">Progress &amp; charts</button>
+        <button id="btnHome">Back to setup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ STATS ============ -->
+  <div id="stats" class="hidden">
+    <div class="block" style="gap:20px">
+      <div class="row">
+        <button id="stBack">← Back</button>
+        <div class="spacer" style="flex:1"></div>
+        <button class="small" id="stJson">Export JSON</button>
+        <button class="small" id="stCsv">Export CSV</button>
+        <button class="small" id="stWipe" style="color:var(--dim)">Reset progress</button>
+      </div>
+      <div class="tiles" id="stTiles"></div>
+      <div class="figs" id="figs"></div>
+    </div>
+  </div>
+
+</div>
+
+<div id="tip"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ==========================================================
+     1 · THE GLOSSARY
+     [section, term, definition, [[conceptLabel, ...synonyms], ...]]
+     The concept keys are what a typed definition is graded on.
+     ========================================================== */
+
+  var SECTIONS = [
+    "Foundations",
+    "How Language Models Work",
+    "Training",
+    "Inference & Running Models",
+    "Prompting",
+    "Retrieval & Knowledge",
+    "Agents & Tools",
+    "Voice Agents",
+    "Version Control & GitHub",
+    "APIs & Building",
+    "Evaluation, Risk & Ethics"
+  ];
+
+  var RAW = [
+/* --- 0 · Foundations --- */
+[0,"Artificial Intelligence (AI)","Software that performs tasks normally requiring human judgment — recognizing, predicting, generating, deciding. An umbrella term, not a specific technology.",
+ [["tasks needing human judgment","human judgment","human judgement","human intelligence","humans normally","like a human","judgment","judgement","decide","reason","recogni","predict"],
+  ["an umbrella term, not one technology","umbrella","broad term","catch all","not a specific","not one technology","many technique","general term"]]],
+[0,"Machine Learning (ML)","A subset of AI where a system learns patterns from data instead of following hand-written rules.",
+ [["learns patterns from data","learn pattern","from data","from examples","trained on data","learns from","data driven"],
+  ["instead of hand-written rules","instead of rule","not rule","hand written","hardcod","hard cod","explicit rule","programmed rule","without rule","rather than rule"]]],
+[0,"Deep Learning","ML using neural networks with many layers. Nearly all modern AI (image, speech, language) is deep learning.",
+ [["uses neural networks","neural net","neural network","network"],
+  ["with many layers","many layer","multiple layer","lots of layer","several layer","deep","stacked"]]],
+[0,"Neural Network","A model made of layers of interconnected “neurons,” each applying a weighted sum plus a nonlinearity. Loosely brain-inspired; mathematically just matrix multiplication at scale.",
+ [["layers of connected neurons","layer","neuron","node","unit","connected","interconnect"],
+  ["weighted sum plus a nonlinearity","weighted sum","weight","matrix multipl","nonlinear","non linear","activation","maths","math"]]],
+[0,"Model","The trained artifact — the file(s) of learned numbers plus the architecture that uses them. “Downloading a model” means downloading those weights.",
+ [["the trained artifact / learned weights","weight","learned number","parameter","trained artifact","the file","artifact","trained thing","saved"],
+  ["plus the architecture that uses them","architecture","structure","blueprint","plus the","shape","how it"]]],
+[0,"Weights / Parameters","The learned numbers inside a model. “70B parameters” = 70 billion of them. More parameters generally means more capability and more memory required.",
+ [["the learned numbers inside a model","learned number","number","value","learn","inside","trained"],
+  ["count tracks capability and memory","billion","70b","size","how big","capabilit","capacit","memory","more parameter","bigger","scale"]]],
+[0,"Architecture","The structural blueprint of a model (e.g. Transformer, CNN, RNN). Two models can share an architecture but have completely different weights.",
+ [["the structural blueprint of a model","blueprint","structur","design","shape","layout","arrangement","how it is built","form"],
+  ["separate from the weights","different weight","same architecture","not the weight","transformer","cnn","rnn","share","independent of"]]],
+[0,"Transformer","The architecture behind virtually all modern language models. Its key innovation is attention. Introduced in 2017.",
+ [["the architecture behind modern language models","architecture","behind","modern","language model","llm","every model","standard"],
+  ["its key innovation is attention","attention"]]],
+[0,"Training vs. Inference","Training = teaching the model (expensive, done once). Inference = using the trained model to produce output (cheap-ish, done constantly).",
+ [["training teaches the model — expensive, done once","teach","train","learn","expensive","costly","once","up front","build"],
+  ["inference is using it — cheap, done constantly","inference","using the model","use the model","using it","produce output","generat","constant","every time","cheap","serve","at runtime"]]],
+
+/* --- 1 · How Language Models Work --- */
+[1,"LLM (Large Language Model)","A large neural network trained to predict the next token in a sequence. That single objective, at scale, produces reasoning, translation, coding, and conversation.",
+ [["a large neural network","large","big","neural","network","huge"],
+  ["trained to predict the next token","next token","next word","predict","token"]]],
+[1,"Token","The unit an LLM reads and writes. Roughly ¾ of a word in English — “unbelievable” might be un + believ + able. Models see tokens, never letters, which is why they struggle to count characters.",
+ [["the unit a model reads and writes","unit","piece","chunk","fragment","bit","what the model read","reads and write","input"],
+  ["roughly part of a word, not a letter","word","letter","character","three quarter","3 4","sub word","subword","part of"]]],
+[1,"Tokenizer","The component that converts text into token IDs and back. Different model families use different tokenizers.",
+ [["converts text into token IDs","convert","turn","translat","text into token","token id","encode","split","break","map"],
+  ["and back again","back","decode","reverse","both way","and from"]]],
+[1,"Embedding","A list of numbers (a vector) representing meaning. Similar meanings sit close together in that numeric space. Foundation of search, RAG, and recommendation.",
+ [["a vector of numbers","vector","list of number","numbers","array","numeric"],
+  ["representing meaning — similar things sit close","meaning","semantic","similar","close","near","distance","space","related"]]],
+[1,"Vector","An ordered list of numbers. An embedding is a vector; so is nearly everything inside a model.",
+ [["an ordered list of numbers","ordered list","list of number","array","sequence of number","row of number","string of number"],
+  ["embeddings are vectors — they're everywhere inside a model","embedding","inside a model","inside model","everything","dimension","coordinate"]]],
+[1,"Attention","The mechanism letting the model weigh which earlier tokens matter when producing the next one. “Self-attention” = the sequence attending to itself.",
+ [["weighs which earlier tokens matter","weigh","which token","earlier","previous","relevant","matter","importan","focus","relate","look back"],
+  ["self-attention = the sequence attends to itself","self attention","itself","own sequence","each other","internal"]]],
+[1,"Context Window","The maximum number of tokens a model can consider at once — prompt plus response. Exceed it and the earliest content falls out of view.",
+ [["the maximum tokens it can consider at once","maximum","max","limit","how much","how many","token","size","at once","capacity"],
+  ["prompt plus response; overflow falls out","prompt and response","both","exceed","overflow","full","falls out","forget","drop","truncat","lost","pushed out"]]],
+[1,"Next-Token Prediction","The core operation. The model outputs a probability distribution over the whole vocabulary, then one token is chosen and appended, and the process repeats.",
+ [["a probability distribution over the vocabulary","probabilit","distribution","likelihood","chance","vocabulary","score","every token"],
+  ["one token is chosen, appended, and it repeats","chosen","choose","pick","append","add","repeat","again","loop","one at a time","then"]]],
+[1,"Autoregressive","Generating one token at a time, each conditioned on all previous ones. Why responses stream in word by word.",
+ [["one token at a time","one token","one at a time","token by token","word by word","sequential","step by step"],
+  ["each conditioned on all the previous ones","previous","prior","before","conditioned","depends","history","earlier","what came"]]],
+[1,"Mixture of Experts (MoE)","An architecture where only a fraction of the model's parameters activate per token. Gives large-model quality at smaller-model inference cost.",
+ [["only some parameters activate per token","fraction","subset","some","part","only","few","sparse","activat","expert","route"],
+  ["large-model quality at lower inference cost","cost","cheap","efficient","fast","quality","large model","big model","as if","without paying"]]],
+[1,"Multimodal","A model that handles more than one input type — text plus images, audio, or video.",
+ [["handles more than one input type","more than one","multiple","several","different type","not just text","mode","kinds of input"],
+  ["text plus images, audio or video","image","audio","video","picture","sound","vision","speech","visual"]]],
+
+/* --- 2 · Training --- */
+[2,"Pre-training","The initial, massive training run on broad data. Where general capability comes from. Costs millions of dollars.",
+ [["the initial massive run on broad data","initial","first","massive","huge","big","broad","general data","from scratch","bulk"],
+  ["source of general capability; very expensive","general capabilit","general","capabilit","expensive","million","cost","dollar"]]],
+[2,"Fine-tuning","Further training of an existing model on a narrower dataset to specialize it. Vastly cheaper than pre-training.",
+ [["further training of an existing model","further","additional","more training","extra","continue","existing","already trained","on top"],
+  ["on a narrower dataset, to specialize it","narrow","smaller","specific","specializ","particular","task","domain","own data","tailor"]]],
+[2,"LoRA (Low-Rank Adaptation)","A fine-tuning method that trains a small add-on layer instead of the whole model. Fast, cheap, and swappable.",
+ [["trains a small add-on instead of the whole model","small","add on","adapter","extra layer","few parameter","instead of the whole","not the whole","part"],
+  ["cheap, fast and swappable","cheap","fast","quick","swap","efficient","light","easy"]]],
+[2,"Loss Function","The formula measuring how wrong a prediction was. Training = making this number go down.",
+ [["measures how wrong a prediction was","how wrong","wrong","error","difference","measure","distance","off by","incorrect","mistake"],
+  ["training pushes it down","down","minimi","reduce","lower","smaller","goal","optimi","decrease"]]],
+[2,"Backpropagation","The algorithm that computes how much each weight contributed to the error, working backward from output to input. It produces the gradients.",
+ [["how much each weight contributed to the error","contribut","blame","how much","each weight","responsib","error","fault","effect"],
+  ["works backward and produces the gradients","backward","back","reverse","output to input","from the output","gradient","chain rule"]]],
+[2,"Gradient","The direction and magnitude of change that would reduce the loss for a given weight.",
+ [["direction and size of a change","direction","magnitude","size","how much","slope","derivative","which way","amount"],
+  ["that would reduce the loss","reduce","lower","decrease","loss","error","improve","minimi"]]],
+[2,"Gradient Descent","Repeatedly nudging weights in the direction the gradients indicate. The actual “learning” step.",
+ [["nudging weights along the gradients","nudge","adjust","update","move","step","change weight","direction","gradient"],
+  ["repeatedly — this is the learning","repeat","again","iterat","over and over","each step","learning","actual learn"]]],
+[2,"Epoch / Batch","An epoch is one full pass through the training data. A batch is the chunk of examples processed before each weight update.",
+ [["epoch = one full pass through the data","epoch","full pass","whole data","entire","one pass","all the data","complete pass"],
+  ["batch = the chunk before each update","batch","chunk","group","subset","handful","before update","weight update","at a time"]]],
+[2,"Learning Rate","How big each nudge is. Too high, training diverges; too low, it never finishes.",
+ [["how big each update step is","how big","size","step","magnitude","amount","how much","speed"],
+  ["too high diverges, too low never finishes","too high","too big","too low","too small","diverge","overshoot","slow","never","unstable","forever"]]],
+[2,"Overfitting","The model memorizes training data instead of generalizing. Performs great on training data, poorly on new data.",
+ [["memorizes the training data","memoriz","learns the data","by heart","too closely","training data","fits the training"],
+  ["fails on new, unseen data","generali","new data","unseen","test data","poorly","badly","real world","doesn't work","fails"]]],
+[2,"RLHF (Reinforcement Learning from Human Feedback)","Training a model against human preference ratings to make it more helpful and less harmful. What turns a raw text predictor into an assistant.",
+ [["trained against human preference ratings","human","preference","rating","feedback","rank","people","prefer","judge","reward"],
+  ["makes it a helpful, less harmful assistant","helpful","harmless","less harm","assistant","chat","useful","safe","polite","behave"]]],
+[2,"Alignment","The broad effort to make a model's behaviour match human intent and values.",
+ [["making behaviour match human intent and values","match","intent","values","what we want","human","goal","behave","should","expect"]]],
+[2,"Distillation","Training a small model to imitate a large one, capturing much of the capability at a fraction of the size.",
+ [["a small model imitates a large one","small model","student","teacher","imitate","copy","mimic","learn from","big model","large model"],
+  ["keeps much capability at a fraction of the size","capabilit","performance","quality","smaller","fraction","size","cheap","most of"]]],
+
+/* --- 3 · Inference & Running Models --- */
+[3,"Inference","Running a trained model to get an output. Every chat message you send is an inference request.",
+ [["running a trained model to get output","running","run","using","use","produce output","an output","generat","forward pass","execut","get an answer"],
+  ["every request you send is one","request","each message","every message","chat","prompt","every time","each query"]]],
+[3,"Temperature","Controls randomness in token selection. 0 = deterministic and repetitive; high = creative and erratic.",
+ [["controls randomness in token selection","random","creativ","variet","unpredictab","sampling","diversity","spice"],
+  ["0 is deterministic, high is erratic","zero","0","deterministic","same","repetitive","predictab","high","erratic","wild","chaotic"]]],
+[3,"Top-p / Top-k","Alternative sampling controls limiting the pool of candidate next tokens.",
+ [["sampling controls","sampling","sample","control","choos","select","setting"],
+  ["they limit the pool of candidate tokens","pool","candidate","limit","restrict","subset","top","cut off","cumulative","most likely","shortlist"]]],
+[3,"Sampling","The act of choosing the next token from the probability distribution.",
+ [["choosing the next token from the distribution","choos","pick","select","draw","next token","distribution","probabilit"]]],
+[3,"Latency","Time from request to response. In voice work, the number that makes or breaks the experience.",
+ [["time from request to response","time","delay","how long","wait","request","response","round trip","lag"],
+  ["decisive in voice work","voice","real time","conversation","experience","matter","break","feel"]]],
+[3,"TTFT (Time To First Token)","How long until the first token appears. Perceived responsiveness depends on this more than total time.",
+ [["how long until the first token appears","first token","first","begin","start","initial","appear","show"],
+  ["drives perceived responsiveness","perceiv","feel","seem","responsive","snappy","fast","user","experience"]]],
+[3,"Throughput","Tokens produced per second.",
+ [["tokens produced per second","per second","tokens per","rate","speed","how many","volume","output rate"]]],
+[3,"Streaming","Sending tokens to the user as they're generated rather than waiting for the full response.",
+ [["sending tokens as they are generated","as they","while","incremental","progressiv","token by token","word by word","immediately","live","one by one"],
+  ["rather than waiting for the whole response","wait","whole","complete","entire","full response","all at once","finished","end"]]],
+[3,"Quantization","Compressing weights to lower precision (e.g. 16-bit → 4-bit) so a model fits smaller hardware. Trades a little accuracy for a lot of memory.",
+ [["compressing weights to lower precision","compress","lower precision","less precision","fewer bit","reduce precision","4 bit","8 bit","16 bit","shrink","smaller number","round"],
+  ["so it fits smaller hardware","hardware","gpu","memory","ram","fit","smaller","laptop","device","less vram"],
+  ["trades a little accuracy","accuracy","quality","trade","precision loss","slightly worse","cost of","lose a little"]]],
+[3,"VRAM","Video memory on a GPU. The practical ceiling on what model you can run locally.",
+ [["video memory on a GPU","gpu","video memory","graphics","card","vram"],
+  ["the ceiling on what you can run locally","limit","ceiling","cap","how big","run local","locally","fit","constraint","determin"]]],
+[3,"Local Inference","Running a model on your own hardware rather than calling a cloud API. Better privacy and no per-token cost; limited by your GPU.",
+ [["running on your own hardware, not a cloud API","own hardware","own machine","your machine","local","on device","my computer","not cloud","instead of cloud","offline","cloud","api"],
+  ["private and free, but GPU-limited","privacy","privat","no cost","free","per token","gpu","limited","constrain","weaker","trade"]]],
+[3,"KV Cache","Stored intermediate values from earlier tokens so they don't need recomputing. Speeds up generation, consumes memory.",
+ [["stores intermediate values from earlier tokens","stor","save","cach","intermediate","earlier token","previous","already","key value","past"],
+  ["avoids recomputing; costs memory","recomput","again","re do","redo","speed","faster","memory","ram","trade"]]],
+
+/* --- 4 · Prompting --- */
+[4,"Prompt","The input text given to a model.",
+ [["the input text you give the model","input","text","what you","question","instruction","give","send","ask","type"]]],
+[4,"System Prompt","Instructions setting the model's role, constraints, and behaviour, separate from the user's message.",
+ [["sets the model's role, constraints and behaviour","role","constraint","behaviour","behavior","instruction","persona","rule","how to act","identity","guideline"],
+  ["separate from the user's message","separate","apart","not the user","before","above","hidden","developer","system level"]]],
+[4,"Prompt Engineering","The practice of structuring inputs to get reliable outputs. Less mystical than it sounds: be specific, give examples, state the format.",
+ [["structuring inputs to get reliable outputs","structur","writing","craft","design","word","phras","input","reliab","better output","consistent"],
+  ["be specific, give examples, state the format","specific","example","format","clear","detail","explicit","instruction"]]],
+[4,"Zero-shot / Few-shot","Asking with no examples vs. including a few worked examples in the prompt.",
+ [["zero-shot = no examples","zero shot","zero","no example","without example","none","just ask"],
+  ["few-shot = a few examples in the prompt","few shot","few example","some example","worked example","demonstrat","sample","show it"]]],
+[4,"Chain of Thought (CoT)","Prompting the model to reason step by step before answering. Improves accuracy on multi-step problems.",
+ [["reason step by step before answering","step by step","reason","think","work through","show","working","intermediate","out loud","before answer"],
+  ["improves accuracy on multi-step problems","accura","better","improve","multi step","complex","harder","math","logic","fewer mistake"]]],
+[4,"Context","Everything currently in the model's window — system prompt, history, retrieved documents, tool results.",
+ [["everything currently in the model's window","everything","all","window","currently","right now","can see","available","in front"],
+  ["system prompt, history, documents, tool results","system prompt","history","conversation","previous","document","retriev","tool"]]],
+[4,"Prompt Injection","An attack where malicious instructions hidden in data (a webpage, an email, a document) hijack the model's behaviour. A live, unsolved security problem for agents.",
+ [["malicious instructions hidden in data","malicious","hidden","embedded","attacker","inject","instruction","in the data","webpage","email","document","content"],
+  ["hijacks the model's behaviour","hijack","take over","override","control","redirect","make it","attack","obey"],
+  ["an unsolved security problem for agents","unsolved","not solved","security","risk","agent","dangerous","open problem","no fix"]]],
+
+/* --- 5 · Retrieval & Knowledge --- */
+[5,"RAG (Retrieval-Augmented Generation)","Fetching relevant documents and inserting them into the prompt so the model answers from real sources instead of memory. The standard pattern for grounding AI in your own data.",
+ [["fetch relevant documents into the prompt","fetch","retriev","search","find","look up","document","chunk","insert","into the prompt","add"],
+  ["so it answers from real sources, not memory","source","real","ground","not memory","own data","actual","cite","evidence","instead of memory"]]],
+[5,"Vector Database","A database that stores embeddings and finds the nearest matches by meaning. Examples: Pinecone, Chroma, Qdrant, pgvector.",
+ [["stores embeddings","embedding","vector","store","hold","keep"],
+  ["finds nearest matches by meaning","nearest","similar","closest","match","meaning","semantic","search","distance"]]],
+[5,"Chunking","Splitting documents into passages small enough to retrieve and fit in context. Chunk size and overlap materially affect RAG quality.",
+ [["splitting documents into passages","split","divid","break","cut","piece","passage","section","part","segment"],
+  ["small enough to retrieve and fit in context","retriev","fit","context","size","small","overlap","window","manageable"]]],
+[5,"Semantic Search","Search by meaning rather than keyword match.",
+ [["search by meaning, not keyword","meaning","semantic","similar","concept","intent","not keyword","keyword","exact word","sense"]]],
+[5,"Knowledge Cutoff","The date after which a model has no training knowledge. Anything later must be supplied via search or retrieval.",
+ [["the date after which it knows nothing","date","cutoff","cut off","after","training data","no knowledge","doesn't know","unaware","stops","last"],
+  ["later facts must be supplied to it","search","retriev","supplied","provide","tool","give it","fed","told","context"]]],
+[5,"Grounding","Tying a model's output to verifiable sources.",
+ [["tying output to verifiable sources","source","verif","evidence","cite","citation","real data","document","fact","back up","reference"]]],
+
+/* --- 6 · Agents & Tools --- */
+[6,"Agent","An LLM given tools and a goal, running in a loop: decide → act → observe → repeat, until the task is done.",
+ [["an LLM with tools and a goal","tool","goal","task","llm","model","objective"],
+  ["runs in a loop until the task is done","loop","repeat","iterat","cycle","decide","act","observ","until","done","autonom","by itself"]]],
+[6,"Tool Use / Function Calling","The model outputs a structured request to run a function (search, query a database, send an email), receives the result, and continues.",
+ [["outputs a structured request to run a function","structur","json","request","call","function","tool","invoke","asks to run","output"],
+  ["gets the result back and continues","result","back","receiv","return","continue","then","carries on","uses it"]]],
+[6,"Agentic Loop","The repeating cycle of reasoning and action that distinguishes an agent from a single-shot chatbot.",
+ [["the repeating cycle of reasoning and action","cycle","loop","repeat","reason","act","action","observ","iterat","again"],
+  ["what separates an agent from a chatbot","agent","chatbot","single shot","one shot","differen","distinguish","separat","not just"]]],
+[6,"MCP (Model Context Protocol)","An open standard for connecting models to external tools and data sources — a universal adapter so every integration isn't bespoke.",
+ [["an open standard connecting models to tools and data","standard","protocol","open","connect","tool","data source","integrat","link","interface"],
+  ["a universal adapter instead of bespoke work","universal","adapter","plug","any","common","one way","bespoke","custom","rewrit","reuse"]]],
+[6,"Orchestration","Coordinating multiple models, agents, or steps into a working system.",
+ [["coordinating multiple models, agents or steps","coordinat","manag","combin","multiple","many","agent","model","step","arrang","schedul"],
+  ["into one working system","system","workflow","pipeline","together","whole","working"]]],
+[6,"Multi-Agent System","Several specialized agents dividing a task, often with a coordinator delegating to workers.",
+ [["several specialized agents divide a task","several","multiple","many","specializ","divid","split","different agent","share the","each"],
+  ["often a coordinator delegating to workers","coordinat","orchestrat","manager","lead","delegat","worker","sub agent","assign","boss"]]],
+[6,"Guardrails","Constraints on what an agent may do — allowed tools, spending caps, human approval for risky actions.",
+ [["constraints on what an agent may do","constrain","limit","restrict","rule","boundar","what it can","allowed","permission","fence","control"],
+  ["allowed tools, spend caps, approval for risk","tool","spend","cost","budget","cap","approval","human","risky","danger"]]],
+[6,"Human in the Loop (HITL)","A checkpoint requiring human approval before an agent takes a consequential action.",
+ [["a human approval checkpoint","approval","approve","confirm","checkpoint","review","permission","person","human","sign off","ask"],
+  ["before a consequential action","before","consequen","risky","important","irreversible","serious","action","big","costly"]]],
+[6,"State / Memory","Information an agent carries between steps or sessions. Models are stateless by default; memory must be engineered.",
+ [["information carried between steps or sessions","carri","between","across","remember","retain","previous","session","step","history","persist"],
+  ["models are stateless by default — memory is built","stateless","no memory","by default","engineer","built","must be","added","design","doesn't remember"]]],
+
+/* --- 7 · Voice Agents --- */
+[7,"STT / ASR (Speech-to-Text / Automatic Speech Recognition)","Converting spoken audio into text. Whisper is the common open model.",
+ [["converting spoken audio into text","audio","speech","spoken","voice","into text","transcri","recogni","hear","words"]]],
+[7,"TTS (Text-to-Speech)","Converting text into spoken audio.",
+ [["converting text into spoken audio","text","into speech","into audio","spoken","voice","read aloud","synthes","speak","say"]]],
+[7,"Voice Cloning","Generating speech in a specific person's voice from a short sample. Powerful and ethically loaded — consent matters.",
+ [["speech in a specific person's voice from a sample","specific","person","someone","their voice","particular","sample","clip","recording","short","copy","imitat","replicat"],
+  ["consent matters — ethically loaded","consent","ethic","permission","misuse","deepfake","fraud","danger","abuse","legal"]]],
+[7,"Voice Pipeline","The classic three-stage design: STT → LLM → TTS. Modular and debuggable, but latency accumulates at each stage.",
+ [["three stages: STT then LLM then TTS","stt","speech to text","llm","tts","text to speech","three stage","3 stage","stages","transcri"],
+  ["modular but latency accumulates","modular","debug","separate","swap","inspect","latency","adds up","accumulat","delay","each stage","stack"]]],
+[7,"Speech-to-Speech","A single model handling audio in and audio out, skipping the text round trip. Lower latency, preserves tone and emotion, harder to inspect.",
+ [["one model, audio in and audio out","one model","single model","same model","audio in","audio out","direct","no text","skip","without text","end to end"],
+  ["lower latency and keeps tone, but harder to inspect","latency","faster","quick","tone","emotion","prosody","express","inspect","debug","opaque","black box","harder"]]],
+[7,"VAD (Voice Activity Detection)","Detecting when someone is actually speaking versus background noise.",
+ [["detecting when someone is actually speaking","detect","when","speaking","speech","talking","voice present","sound","active"],
+  ["as opposed to background noise","noise","silence","background","quiet","not speech","room","empty"]]],
+[7,"Turn Detection / Endpointing","Deciding when the user has finished their turn so the agent can respond. Get it wrong and the agent either interrupts or feels sluggish.",
+ [["deciding the user has finished their turn","finish","done","end","stop","turn","complete","said everything","pause"],
+  ["so the agent can respond; errors interrupt or lag","respond","reply","speak","interrupt","cut off","talk over","slow","sluggish","wait","too early","too late","awkward"]]],
+[7,"Barge-in","Letting the user interrupt mid-response and having the agent stop talking. Essential for natural conversation.",
+ [["the user interrupts mid-response","interrupt","cut in","cut off","talk over","break in","mid","while","during","over the top"],
+  ["and the agent stops talking","stop","halt","quiet","yield","shut up","stops speaking","gives way","listen"]]],
+[7,"Latency Budget","The total allowable round-trip time. Under ~800 ms feels conversational; past ~1.5 s feels broken. Every stage spends from this budget.",
+ [["the total allowable round-trip time","total","allowab","budget","overall","round trip","time","target","maximum","whole"],
+  ["thresholds where it feels natural or broken","800","1 5","1.5","second","ms","millisecond","conversational","natural","feel","broken","laggy"],
+  ["every stage spends from it","each stage","every stage","spend","divide","share","consume","split","adds"]]],
+[7,"WER (Word Error Rate)","The standard accuracy measure for speech recognition. Lower is better. Accents, jargon, and background noise all raise it.",
+ [["the accuracy measure for speech recognition","accuracy","measure","metric","score","error rate","transcription","recognition","how good","stt"],
+  ["lower is better; noise and accents raise it","lower","better","less","accent","jargon","noise","raise","worse","increase","technical term"]]],
+[7,"Diarization","Identifying who spoke when in multi-speaker audio.",
+ [["identifying who spoke when","who","speaker","which person","identif","separat","label","attribut","when"],
+  ["in multi-speaker audio","multi speaker","multiple","several","two or more","conversation","meeting","group","audio"]]],
+[7,"Prosody","The rhythm, stress, and intonation of speech — what makes synthesized voice sound human or robotic.",
+ [["the rhythm, stress and intonation of speech","rhythm","stress","intonation","pitch","tone","melody","emphasis","pace","cadence","inflection"],
+  ["what makes a voice sound human or robotic","human","natural","robotic","flat","lifelike","monotone","sound","expressive"]]],
+[7,"SSML","A markup language for controlling TTS output: pauses, emphasis, pronunciation, speed.",
+ [["a markup language for controlling TTS output","markup","language","tag","xml","control","tts","speech","annotat","syntax"],
+  ["pauses, emphasis, pronunciation, speed","pause","break","emphasis","pronunc","speed","rate","volume","stress","how it says"]]],
+[7,"Phoneme","The smallest unit of speech sound. Used to fix mispronunciations of names and technical terms.",
+ [["the smallest unit of speech sound","smallest","unit","sound","basic","individual","atom","piece of sound"],
+  ["used to fix mispronunciations","mispronounc","pronunc","fix","correct","name","technical term","say it right","force"]]],
+
+/* --- 8 · Version Control & GitHub --- */
+[8,"Git","The version control system. Tracks every change to your files, who made it, and when. Runs locally.",
+ [["a version control system tracking every change","version control","vcs","track","change","history","who","when","record","snapshot"],
+  ["runs locally","local","your machine","own machine","offline","distributed","on disk"]]],
+[8,"GitHub","A hosting platform for Git repositories, plus collaboration tools on top. Git ≠ GitHub.",
+ [["hosts Git repositories","host","platform","cloud","online","remote","website","repo","server","store"],
+  ["adds collaboration tools; not the same as Git","collaborat","pull request","issue","team","share","social","review","not git","different","separate","on top"]]],
+[8,"Repository (Repo)","A project folder tracked by Git, including its full history.",
+ [["a project folder tracked by Git","project","folder","directory","tracked","git","codebase"],
+  ["including its full history","history","all commit","past","version","every change"]]],
+[8,"Commit","A saved snapshot of changes with a message explaining them. The atomic unit of Git history.",
+ [["a saved snapshot of changes","snapshot","save","record","checkpoint","change","version","point in time","captur"],
+  ["with a message; the atomic unit of history","message","describ","explain","why","atomic","unit","history","smallest","label"]]],
+[8,"Branch","A parallel line of development. Lets you work without disturbing the main version.",
+ [["a parallel line of development","parallel","separate","line","copy","diverge","another","side","alternative","fork off"],
+  ["work without disturbing main","without","disturb","break","affect","main","safe","isolat","independent","touching"]]],
+[8,"main","The conventional name for the primary branch.",
+ [["the conventional name for the primary branch","primary","main","default","principal","master","convention","standard","canonical","real"]]],
+[8,"Merge","Combining one branch's changes into another.",
+ [["combining one branch's changes into another","combin","bring","integrat","join","fold","into another","branch","together","apply"]]],
+[8,"Merge Conflict","When two branches change the same lines and Git can't decide which wins. You resolve it by hand.",
+ [["two branches changed the same lines","same line","both","two branch","same place","same file","overlap","competing","clash"],
+  ["Git can't decide; you resolve it by hand","can not","cannot","cant","decide","choose","which","manual","by hand","resolve","yourself","fix"]]],
+[8,"Clone","Downloading a full copy of a remote repo to your machine.",
+ [["downloading a full copy of a remote repo","download","copy","get","pull down","local copy","remote","repo","onto your machine","full"]]],
+[8,"Fork","Making your own copy of someone else's repo under your account.",
+ [["your own copy of someone else's repo","own copy","copy","someone else","another","other","your account","personal","duplicate","under your"]]],
+[8,"Push / Pull","Push = send your local commits to the remote. Pull = fetch and apply the remote's commits locally.",
+ [["push sends local commits to the remote","push","send","upload","to the remote","up","publish","share your"],
+  ["pull fetches and applies remote commits locally","pull","fetch","download","get","from the remote","down","locally","update your","bring"]]],
+[8,"Pull Request (PR)","A proposal to merge your branch, opened for review and discussion. The heart of collaborative workflow.",
+ [["a proposal to merge your branch","propos","request","ask","suggest","offer","merge","branch","want to"],
+  ["opened for review and discussion","review","discuss","comment","feedback","team","approv","check","look at"]]],
+[8,"Issue","A tracked task, bug, or feature request.",
+ [["a tracked task, bug or feature request","task","bug","feature","request","ticket","track","todo","problem","item"]]],
+[8,"README.md","The front page of a repo. What the project is, how to install it, how to use it. Write it first, not last.",
+ [["the front page of a repo","front page","first thing","main","intro","entry","landing","documentation","first file","shop window"],
+  ["what it is, how to install, how to use","what","install","use","setup","set up","how","explain","describ","run it"]]],
+[8,".gitignore","A file listing what Git should never track — secrets, build output, dependencies.",
+ [["lists what Git should never track","list","file","never","ignore","exclude","not track","skip","leave out","tell git"],
+  ["secrets, build output, dependencies","secret","key","env","password","build","output","dependenc","node modules","artifact","junk"]]],
+[8,"GitHub Actions","Automation that runs on repo events: test on every push, deploy on every merge.",
+ [["automation that runs on repo events","automat","run","trigger","event","push","merge","workflow","ci","script","on its own"],
+  ["e.g. test on push, deploy on merge","test","deploy","build","on push","on merge","publish","check"]]],
+[8,"CI/CD","Continuous Integration / Continuous Deployment. Automatically testing and shipping code changes.",
+ [["continuous integration and continuous deployment","continuous integration","continuous deploy","continuous deliver","ci","cd"],
+  ["automatic testing and shipping of changes","automat","test","ship","deploy","release","build","without manual","pipeline"]]],
+[8,"Open Source","Code published under a license permitting use, modification, and redistribution. Terms vary by license — read them.",
+ [["published under a permissive license","license","licence","publish","public","open","free","available","released"],
+  ["allows use, modification, redistribution — terms vary","use","modif","change","redistribut","share","copy","fork","terms","vary","read","condition"]]],
+
+/* --- 9 · APIs & Building --- */
+[9,"API (Application Programming Interface)","A defined way for one program to request something from another.",
+ [["a defined way for one program to request from another","defined","way","interface","program","software","request","talk","communicat","contract","ask","between"]]],
+[9,"Endpoint","A specific URL an API exposes for a specific operation.",
+ [["a specific URL for a specific operation","url","address","route","path","specific","particular","operation","function","action","expose"]]],
+[9,"API Key","A credential authenticating your requests. Treat it like a password: never commit it to a repo.",
+ [["a credential that authenticates your requests","credential","authenticat","identif","secret","token","password","prove","access","who you are","permission"],
+  ["treat it like a password — never commit it","never commit","commit","secret","privat","env","don't share","do not share","password","expose","leak","repo"]]],
+[9,"Environment Variable","A configuration value stored outside your code — the correct home for API keys.",
+ [["a config value stored outside your code","config","value","setting","outside","not in","external","env","separate from","alongside"],
+  ["the right home for API keys","key","secret","credential","api key","password","token"]]],
+[9,"JSON","The standard text format for structured data exchange. Keys, values, nesting.",
+ [["the standard text format for structured data","text","format","structur","data","exchange","standard","common","readable"],
+  ["keys, values, nesting","key","value","nest","pair","object","array","bracket","field"]]],
+[9,"SDK","A language-specific library wrapping an API so you write less boilerplate.",
+ [["a language-specific library wrapping an API","library","package","wrapper","wrap","language","api","toolkit","code that"],
+  ["so you write less boilerplate","boilerplate","less code","easier","simpler","convenien","helper","don't have to","handles"]]],
+[9,"Rate Limit","A cap on requests per time period. Exceed it and you get errors.",
+ [["a cap on requests per time period","cap","limit","maximum","max","how many","request","per","time","minute","second","quota","allowed"],
+  ["exceed it and you get errors","exceed","over","too many","error","block","reject","429","throttl","refus","fail"]]],
+[9,"Webhook","A reverse API call: the service notifies you when something happens.",
+ [["a reverse API call","reverse","backward","opposite","other way","inverted","the other direction","they call you"],
+  ["the service notifies you when something happens","notif","tell","inform","call you","push","send","event","happens","trigger","alert"]]],
+[9,"Container / Docker","Packaging an application with all its dependencies so it runs identically everywhere.",
+ [["packaging an app with all its dependencies","packag","bundl","wrap","box","dependenc","everything","image","together","include"],
+  ["so it runs identically everywhere","identical","same","anywhere","everywhere","consistent","any machine","reproduc","works on","no matter"]]],
+[9,"Localhost","Your own machine, addressed as a server. Where you test before deploying.",
+ [["your own machine addressed as a server","own machine","your computer","local","this machine","127","3000","server","itself"],
+  ["where you test before deploying","test","develop","before deploy","locally","try","dev","preview"]]],
+
+/* --- 10 · Evaluation, Risk & Ethics --- */
+[10,"Hallucination","Confidently stated output that is factually wrong. Not lying — the model has no concept of truth, only likelihood. Always verify consequential claims.",
+ [["confidently stated output that is factually wrong","confident","sure","wrong","false","incorrect","made up","invent","fabricat","not true","untrue","nonsense"],
+  ["not lying — it tracks likelihood, not truth","not lying","not a lie","truth","likelihood","probab","doesn't know","no concept","plausible","statistic","believe"]]],
+[10,"Eval","A structured test measuring model or system performance on a defined task. If you can't measure it, you can't improve it.",
+ [["a structured test measuring performance on a task","test","measure","assess","structured","performance","task","score","benchmark","check","how well"],
+  ["you can't improve what you don't measure","measure","improve","track","baseline","compare","progress","know"]]],
+[10,"Benchmark","A standardized public eval used to compare models. Useful directionally; often gamed.",
+ [["a standardized public eval for comparing models","standard","public","compare","models","common","shared","test","eval","league"],
+  ["directional, and often gamed","direction","rough","guide","gamed","cheat","train on","contaminat","misleading","not perfect","overfit"]]],
+[10,"Bias","Systematic skew in outputs inherited from training data or design choices.",
+ [["systematic skew in outputs","systematic","skew","slant","unfair","consistent","pattern","prejudic","lean","tilt","stereotyp"],
+  ["inherited from training data or design choices","training data","data","design","choice","inherit","source","comes from","built in","people"]]],
+[10,"Red Teaming","Deliberately attacking your own system to find failure modes before someone else does.",
+ [["deliberately attacking your own system","attack","adversar","break","deliberate","try to","probe","stress","hack","abuse","exploit"],
+  ["to find failures before someone else does","find","failure","weakness","vulnerab","hole","before","first","someone else","attacker","in advance"]]],
+[10,"Jailbreak","A prompt crafted to bypass a model's safety behaviour.",
+ [["a prompt crafted to bypass safety behaviour","prompt","craft","design","bypass","get around","circumvent","defeat","trick","evade","safety","guardrail","restriction","refus"]]],
+[10,"PII (Personally Identifiable Information)","Data identifying an individual. Governs what you may send to a third-party API — check your jurisdiction's privacy law.",
+ [["data identifying an individual","identif","individual","person","personal","name","address","who someone","private data","trace"],
+  ["governs what you may send third parties; privacy law","send","third party","api","share","outside","law","regulat","gdpr","privacy","complian","jurisdiction","legal"]]],
+[10,"Data Residency","Where data is physically stored and which laws therefore apply to it.",
+ [["where data is physically stored","where","physical","stored","location","country","region","geograph","server","held","resides"],
+  ["and which laws apply to it","law","jurisdiction","regulat","legal","rule","apply","govern","subject to"]]],
+[10,"Explainability","The degree to which a model's reasoning can be inspected and understood. Generally poor for large models.",
+ [["how far a model's reasoning can be inspected","inspect","understand","explain","interpret","reason","why","transparen","see inside","follow","audit","trace"],
+  ["generally poor for large models","poor","bad","limited","hard","difficult","black box","large model","big model","weak","not good"]]],
+[10,"Automation Bias","The human tendency to over-trust machine output. The most common real-world AI failure is a person not checking.",
+ [["people over-trust machine output","over trust","too much","trust","blindly","accept","assume","rely","defer","believe","take it"],
+  ["the real failure is a person not checking","not check","checking","verify","review","question","person","human","fail","lazy","skip"]]]
+  ];
+
+  /* ==========================================================
+     1b · PLAIN ENGLISH
+     One line per term, same order as RAW. This is what gets read
+     aloud in Teach mode — the glossary wording assumes you already
+     know the material, and these don't.
+     ========================================================== */
+
+  var PLAIN = [
+/* 0 · Foundations */
+"Any software doing a job you'd normally need a person's judgement for. It's a label for a whole field, not one particular gadget.",
+"Instead of you writing the rules, you show the computer thousands of examples and it works the rules out for itself.",
+"Machine learning done with neural networks stacked many layers deep. Essentially all modern AI is this.",
+"Layers of tiny units, each adding up the numbers coming in and passing a signal on. Loosely like brain cells, but really it's just an enormous amount of multiplication.",
+"The finished trained thing: a big file of learned numbers, plus the design that knows how to use them. When you download a model, that file is what you're getting.",
+"The numbers the model learned during training. Seventy billion parameters means seventy billion of those numbers. More of them usually means cleverer, and hungrier for memory.",
+"The shape of a model: how its layers are wired together. Two models can share the same shape and have learned completely different numbers.",
+"The particular design nearly every modern language model uses. Its clever trick is attention. It arrived in twenty seventeen.",
+"Training is the school years: slow, expensive, done once. Inference is the day job: using the trained model to answer you, over and over.",
+/* 1 · How Language Models Work */
+"A very large neural network whose only real skill is guessing the next chunk of text. Do that well enough and conversation, code and reasoning come out of it.",
+"The bite-sized piece of text a model actually reads, roughly three quarters of a word. It never sees individual letters, which is why it miscounts them.",
+"The piece of software that chops your text into those pieces and numbers them, then puts them back together afterwards.",
+"A list of numbers that captures what something means, arranged so that things with similar meanings get similar numbers.",
+"Just an ordered list of numbers. Embeddings are vectors, and so is nearly everything inside a model.",
+"The mechanism that lets the model decide which earlier words matter right now. When a sentence looks at itself this way, it's called self-attention.",
+"How much the model can hold in its head at once, counting your prompt and its reply together. Fill it up and the oldest material falls out the back.",
+"The model scores every possible next chunk of text, one gets picked, it's stuck on the end, and then the whole thing runs again.",
+"Writing one piece at a time, where each piece depends on everything already written. That's why answers appear word by word.",
+"A design where only a slice of the model wakes up for each token. You get big-model quality without paying big-model running costs.",
+"A model that takes more than just text: pictures, sound or video as well.",
+/* 2 · Training */
+"The enormous first training run over a mountain of general text. This is where the broad ability comes from, and it costs millions.",
+"Taking a model that's already trained and training it a bit more on your narrower material, so it gets good at your particular job. Far cheaper than starting over.",
+"A cheap way to fine-tune: leave the big model alone and train a small bolt-on piece instead. Quick, and you can swap the piece out.",
+"The score for how wrong the model's guess was. Training is simply the business of driving that score down.",
+"Working backwards from the mistake to work out how much each individual number was to blame. That blame is what gets used to fix things.",
+"For one number inside the model: which direction to nudge it, and how hard, to make the mistake smaller.",
+"Actually doing the nudging, over and over. This repeated nudging is the whole of what people call learning.",
+"An epoch is one complete lap through all the training data. A batch is the handful of examples it looks at before each nudge.",
+"How big each nudge is. Too big and it thrashes about and never settles. Too small and you'll be waiting forever.",
+"When the model has effectively memorised the practice papers. Brilliant on those, useless on anything new.",
+"Show people two answers, ask which they prefer, and train the model towards the preferred one. This is the step that turns a text predictor into something that behaves like an assistant.",
+"The whole effort to get a model doing what people actually intend and value, rather than something technically correct but unwanted.",
+"Have a small model copy a big one's answers. You keep most of the ability at a fraction of the size.",
+/* 3 · Inference & Running Models */
+"Running the finished model to get an answer out of it. Every message you send is one of these.",
+"The randomness dial. At zero it says the same safe thing every time. Turn it up and it gets inventive, then unhinged.",
+"Other dials doing a similar job: they cut down the shortlist of words the model is allowed to pick from.",
+"The actual act of picking the next word from all the scored candidates.",
+"How long you wait between asking and getting an answer. In voice work this is the number that decides whether it feels alive.",
+"How long before the very first word appears. This matters more to how fast it feels than the total time does.",
+"How many tokens come out per second.",
+"Sending words out as they're produced, instead of making you wait for the whole finished answer.",
+"Squashing the model's numbers into fewer bits so it fits on smaller hardware. You lose a sliver of accuracy and save a mountain of memory.",
+"The memory on your graphics card. In practice it's the hard ceiling on how big a model you can run at home.",
+"Running the model on your own machine instead of calling somebody's cloud. Private, and free per use, but limited by your graphics card.",
+"Keeping the working-out from earlier words so it doesn't have to redo it every time. Faster, at the cost of memory.",
+/* 4 · Prompting */
+"The text you give the model.",
+"The standing instructions sitting behind the conversation, setting the model's role, its rules and how it should behave. You don't see it in the chat.",
+"The craft of wording a request so you reliably get what you want. Less mystical than it sounds: be specific, show an example, say what format you want.",
+"Zero-shot is asking cold, with no examples. Few-shot is showing it two or three worked examples first.",
+"Telling the model to work through it step by step before answering. It gets noticeably better at anything with several stages.",
+"Everything the model can currently see: the standing instructions, the conversation so far, any documents fetched in, and any tool results.",
+"An attack where instructions are smuggled inside content the model reads, such as a web page or an email, and it obeys them instead of you. Still unsolved, and serious once agents can act on it.",
+/* 5 · Retrieval & Knowledge */
+"Go and fetch the relevant documents, paste them into the prompt, and make the model answer from those rather than from memory. This is the standard way to point AI at your own material.",
+"A store for embeddings that can quickly find the entries closest in meaning to whatever you asked.",
+"Cutting documents into passages small enough to fetch and small enough to fit. How big you cut them, and how much they overlap, quietly decides how good your results are.",
+"Searching by what you meant, rather than by the exact words you typed.",
+"The date the model's training stopped. It knows nothing after that unless you hand the information to it.",
+"Anchoring what the model says to sources somebody can actually go and check.",
+/* 6 · Agents & Tools */
+"A model given a goal and some tools, then left to run round a loop: decide, do it, look at the result, go again, until the job is done.",
+"The model asks, in a strict format, for a particular function to be run. The answer comes back to it and it carries on from there.",
+"That repeating think-then-act cycle. It's the thing separating an agent from a chatbot that answers once and stops.",
+"A shared standard for plugging models into outside tools and data, so every connection isn't a bespoke job.",
+"Wiring several models, agents or steps together into one system that works.",
+"Several specialised agents splitting the work, usually with one in charge handing tasks out.",
+"The limits on what an agent is allowed to do: which tools, how much it may spend, and what needs a human to say yes first.",
+"A deliberate stopping point where a person has to approve before the agent does anything that really matters.",
+"Whatever the agent carries forward between steps, or between sessions. Models remember nothing by default, so this has to be deliberately built.",
+/* 7 · Voice Agents */
+"Turning spoken audio into written words. Whisper is the well-known open one.",
+"Turning written words into spoken audio.",
+"Making speech in one particular person's voice from a short recording of them. Powerful, and an ethical minefield: consent is the whole issue.",
+"The classic three-step build: speech to text, then the model, then text to speech. Easy to inspect, but every step adds delay.",
+"One model taking audio straight in and putting audio straight out, skipping the written step in the middle. Faster, and it keeps the feeling in the voice, but much harder to see inside.",
+"Working out whether somebody is actually talking right now, or whether that's just the room.",
+"Deciding the person has finished speaking, so the agent can reply. Get it wrong and it either talks over them or sits there seeming slow.",
+"Letting the person cut in while the agent is still talking, and having it stop promptly. Without this, conversation feels wrong.",
+"The total round-trip time you're allowed, with every stage spending out of the same pot. Under about eight hundred milliseconds feels like talking; past a second and a half feels broken.",
+"The standard score for how badly speech recognition mangled the words. Lower is better, and accents, jargon and background noise all push it up.",
+"Working out who said which part when several people are talking.",
+"The rhythm, stress and tune of speech. It's what makes a synthetic voice sound human rather than robotic.",
+"Small tags you wrap around text to tell the speech engine where to pause, what to stress, and how to pronounce things.",
+"The smallest unit of speech sound. You reach for these to force the right pronunciation of names and technical words.",
+/* 8 · Version Control & GitHub */
+"The tool that records every change to your files, who made it, and when. It runs on your own machine.",
+"A website that hosts Git projects and adds the teamwork parts on top. Git is the tool, GitHub is the place; they are not the same thing.",
+"A project folder that Git is watching, complete with its entire history.",
+"A saved snapshot of your changes, with a note explaining them. It's the basic unit of the history.",
+"A parallel version of the project, so you can work without touching the main one.",
+"The usual name for a project's primary branch.",
+"Bringing one branch's changes into another.",
+"Two branches edited the same lines and Git won't guess which you meant. You have to sort it out by hand.",
+"Downloading your own full copy of a remote project.",
+"Taking your own copy of somebody else's project, under your account.",
+"Push sends your commits up to the remote. Pull brings other people's commits down to you.",
+"You proposing that your branch be merged in, opened up so others can review it and argue about it first. It's the centre of how teams work.",
+"A logged task, bug or feature request.",
+"The front page of a project: what it is, how to install it, how to use it. Write it first, not last.",
+"A list of things Git should never record: secrets, build output, and downloaded dependencies.",
+"Jobs that run automatically when something happens in the project. Run the tests on every push; deploy on every merge.",
+"Continuous integration and continuous deployment: testing and shipping your changes automatically instead of by hand.",
+"Code published with a licence letting other people use it, change it and pass it on. The exact conditions differ by licence, so read it.",
+/* 9 · APIs & Building */
+"An agreed way for one program to ask another program for something.",
+"One specific web address an API offers, for one specific job.",
+"The credential proving a request really came from you. Treat it exactly like a password, and never let it get committed.",
+"A setting kept outside your code, which is where your keys belong.",
+"The common text format for passing structured data around. Names, values, and things nested inside other things.",
+"A library in your own language that wraps an API so you write far less plumbing.",
+"A ceiling on how many requests you may make in a given time. Go over it and you start getting errors.",
+"An API call in reverse: instead of you asking, the service calls you when something happens.",
+"Boxing up an application with everything it needs, so it runs the same way on any machine.",
+"Your own machine, talking to itself as though it were a server. It's where you try things before putting them live.",
+/* 10 · Evaluation, Risk & Ethics */
+"The model stating something completely wrong with total confidence. It isn't lying, because it has no idea what's true, only what sounds likely. Check anything that matters.",
+"A proper structured test of how well the thing performs at a defined job. If you're not measuring it, you can't tell whether you're improving it.",
+"A public standard test used to compare models. Useful for a rough sense of direction, but widely gamed.",
+"A consistent unfair lean in what comes out, inherited from the training data or from choices made while building it.",
+"Deliberately attacking your own system to find out how it breaks, before somebody less friendly does.",
+"A prompt written specifically to get around a model's safety behaviour.",
+"Information that identifies a real person. It governs what you're allowed to send off to somebody else's API, and the rules depend on where you are.",
+"Which country your data physically sits in, and therefore whose laws apply to it.",
+"How far you can actually look inside and follow why a model decided something. For big models, not very far.",
+"People's habit of trusting the machine too readily. The most common real AI failure isn't the model being wrong, it's nobody checking."
+  ];
+
+  /* ==========================================================
+     2 · DERIVED DATA
+     ========================================================== */
+
+  function norm(s) {
+    return String(s).toLowerCase()
+      .replace(/[’‘']/g, "")
+      .replace(/[^a-z0-9]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function acceptedForms(term) {
+    var out = [], base = term, paren = null;
+    var m = term.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+    if (m) { base = m[1].trim(); paren = m[2].trim(); }
+    out.push(base);
+    base.split("/").forEach(function (p) { if (p.trim()) out.push(p.trim()); });
+    if (paren) {
+      out.push(paren);
+      paren.split("/").forEach(function (p) { if (p.trim()) out.push(p.trim()); });
+    }
+    out.push(term);
+    var seen = {}, uniq = [];
+    out.forEach(function (s) {
+      var k = norm(s);
+      if (k && !seen[k]) { seen[k] = 1; uniq.push(s); }
+    });
+    return uniq;
+  }
+
+  var TERMS = RAW.map(function (r, i) {
+    return {
+      id: i, sec: r[0], term: r[1], def: r[2], keys: r[3],
+      plain: PLAIN[i] || r[2],
+      forms: acceptedForms(r[1])
+    };
+  });
+
+  var NT = TERMS.length;
+
+  function firstSentence(d) {
+    var cut = d.search(/[.?!]\s|[.?!]$/);
+    var s = cut > 0 ? d.slice(0, cut + 1) : d;
+    if (s.length > 132) s = s.slice(0, 129).replace(/\s+\S*$/, "") + "…";
+    return s;
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  /* ==========================================================
+     3 · STORE
+     dir 0 = name it (definition -> term)
+     dir 1 = define it (term -> definition)
+     verdict 0 wrong · 1 partial · 2 right · 3 overridden
+     ========================================================== */
+
+  var KEY = "termdrill.v2", OLDKEY = "termdrill.v1";
+  var MASTER = 2;          // consecutive correct needed per direction
+  var EVCAP = 4000;
+
+  var db = loadDb();
+
+  function blank() { return { v: 2, t: {}, ev: [], ss: [] }; }
+
+  function loadDb() {
+    var d = null;
+    try {
+      var raw = window.localStorage.getItem(KEY);
+      if (raw) d = JSON.parse(raw);
+    } catch (e) { /* storage blocked — run in memory */ }
+    if (!d || typeof d !== "object" || !d.t) d = migrate();
+    if (!d.t) d.t = {};
+    if (!d.ev) d.ev = [];
+    if (!d.ss) d.ss = [];
+    return d;
+  }
+
+  /* carry v1 Leitner levels over: v1's typed mode was definition -> term,
+     so it only tells us about the name-it direction. */
+  function migrate() {
+    var d = blank();
+    try {
+      var raw = window.localStorage.getItem(OLDKEY);
+      if (!raw) return d;
+      var old = JSON.parse(raw);
+      if (!old || typeof old !== "object") return d;
+      Object.keys(old).forEach(function (k) {
+        var e = old[k];
+        if (!e || typeof e !== "object") return;
+        var id = Number(k);
+        if (!(id >= 0 && id < NT)) return;
+        var lv = Number(e.l) || 0;
+        d.t[id] = {
+          r0: lv >= 3 ? 2 : (lv > 0 ? 1 : 0), w0: Number(e.wrong) || 0, s0: Math.min(MASTER, lv),
+          r1: 0, w1: 0, s1: 0, ov: 0
+        };
+      });
+    } catch (e) { /* nothing to migrate */ }
+    return d;
+  }
+
+  function saveDb() {
+    try { window.localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {}
+  }
+
+  function rec(id) {
+    var e = db.t[id];
+    if (!e) e = db.t[id] = { r0: 0, w0: 0, s0: 0, r1: 0, w1: 0, s1: 0, ov: 0 };
+    if (e.r0 === undefined) { e.r0 = 0; e.w0 = 0; e.s0 = 0; }
+    if (e.r1 === undefined) { e.r1 = 0; e.w1 = 0; e.s1 = 0; }
+    return e;
+  }
+  function streak(id, dir) { var e = rec(id); return dir ? e.s1 : e.s0; }
+  function solid(id, dir) { return streak(id, dir) >= MASTER; }
+  function isMastered(id) { return solid(id, 0) && solid(id, 1); }
+
+  function score(id, dir, verdict) {
+    var e = rec(id), good = verdict >= 2;
+    if (dir) {
+      if (good) { e.r1++; e.s1++; } else { e.w1++; e.s1 = 0; }
+    } else {
+      if (good) { e.r0++; e.s0++; } else { e.w0++; e.s0 = 0; }
+    }
+    if (verdict === 3) e.ov = (e.ov || 0) + 1;
+    db.ev.push([Date.now(), id, dir, verdict]);
+    if (db.ev.length > EVCAP) db.ev = db.ev.slice(db.ev.length - EVCAP);
+    saveDb();
+  }
+
+  function weakness(id) {
+    // higher = needs work more. unseen sits above half-learned.
+    var e = rec(id);
+    var s = (e.s0 >= MASTER ? 1 : 0) + (e.s1 >= MASTER ? 1 : 0);
+    var seen = e.r0 + e.w0 + e.r1 + e.w1;
+    return (2 - s) * 100 + (seen === 0 ? 50 : 0) + (e.w0 + e.w1) * 2 - Math.min(seen, 10);
+  }
+
+  /* ==========================================================
+     4 · GRADING
+     ========================================================== */
+
+  function lev(a, b) {
+    if (a === b) return 0;
+    var m = a.length, n = b.length;
+    if (!m) return n;
+    if (!n) return m;
+    var prev = [], cur = [], i, j;
+    for (j = 0; j <= n; j++) prev[j] = j;
+    for (i = 1; i <= m; i++) {
+      cur[0] = i;
+      for (j = 1; j <= n; j++) {
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1,
+          prev[j - 1] + (a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1));
+      }
+      for (j = 0; j <= n; j++) prev[j] = cur[j];
+    }
+    return prev[n];
+  }
+
+  /* name it: exact against accepted forms, with a little typo slack */
+  function gradeTerm(ans, t) {
+    var a = norm(ans);
+    if (!a) return { v: 0, note: "" };
+    for (var i = 0; i < t.forms.length; i++) {
+      if (a === norm(t.forms[i])) return { v: 2, note: "" };
+    }
+    for (i = 0; i < t.forms.length; i++) {
+      var f = norm(t.forms[i]);
+      var slack = f.length >= 12 ? 2 : (f.length >= 5 ? 1 : 0);
+      if (slack && lev(a, f) <= slack) {
+        return { v: 2, note: "Right term — watch the spelling. It's “" + t.forms[i] + "”." };
+      }
+    }
+    return { v: 0, note: "" };
+  }
+
+  function hitsKey(padded, key) {
+    for (var i = 0; i < key.length; i++) {
+      var k = norm(key[i]);
+      if (!k) continue;
+      if (k.length <= 4) {
+        if (padded.indexOf(" " + k + " ") !== -1) return key[i];
+      } else if (padded.indexOf(k) !== -1) return key[i];
+    }
+    return null;
+  }
+
+  /* define it: how many of the term's concept keys the answer conveys */
+  function gradeDef(ans, t) {
+    var a = norm(ans);
+    var padded = " " + a + " ";
+    var got = [], n = t.keys.length, hit = 0;
+    for (var i = 0; i < n; i++) {
+      var m = hitsKey(padded, t.keys[i]);
+      got.push(m);
+      if (m) hit++;
+    }
+    var words = a ? a.split(" ").length : 0;
+    var v;
+    if (!a || words < 2) v = 0;
+    else if (hit === n) v = 2;
+    else if (hit > 0 && hit >= Math.ceil(n / 2)) v = 1;
+    else v = 0;
+    return { v: v, got: got, hit: hit, of: n };
+  }
+
+  /* ==========================================================
+     5 · RUN STATE
+     ========================================================== */
+
+  var BATCH = 10, MIXEVERY = 3, MIXLEN = 15, MOCKLEN = 30;
+
+  var chosen = {};
+  SECTIONS.forEach(function (_, i) { chosen[i] = true; });
+  var runKind = "guided";
+
+  var run = null;
+  var current = null, answered = false, lastVerdict = 0;
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  function shuffle(a) {
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function pool() {
+    return TERMS.filter(function (t) { return chosen[t.sec]; });
+  }
+
+  function show(which) {
+    if (which !== "teach") stopSpeech();
+    ["setup", "teach", "learn", "drill", "batchdone", "done", "stats"].forEach(function (s) {
+      $(s).classList.toggle("hidden", s !== which);
+    });
+    $("wrap").classList.toggle("wide", which === "stats");
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+
+  /* ==========================================================
+     6 · SETUP SCREEN
+     ========================================================== */
+
+  function countIn(sec) { return TERMS.filter(function (t) { return t.sec === sec; }).length; }
+  function masteredIn(sec) {
+    return TERMS.filter(function (t) { return t.sec === sec && isMastered(t.id); }).length;
+  }
+
+  function paintChips() {
+    var box = $("secChips");
+    box.innerHTML = "";
+    SECTIONS.forEach(function (name, i) {
+      var b = document.createElement("button");
+      b.className = "chip";
+      b.setAttribute("aria-pressed", chosen[i] ? "true" : "false");
+      var n = countIn(i), m = masteredIn(i);
+      b.innerHTML = "<span>" + esc(name) + "</span><span class=\"n\">" + n + "</span>" +
+        "<span class=\"mast\"><i style=\"width:" + Math.round((m / n) * 100) + "%\"></i></span>";
+      b.addEventListener("click", function () {
+        chosen[i] = !chosen[i];
+        b.setAttribute("aria-pressed", chosen[i] ? "true" : "false");
+        paintPool();
+      });
+      box.appendChild(b);
+    });
+  }
+
+  function paintPool() {
+    var n = pool().length;
+    $("poolNote").textContent = n === 0 ? "Pick at least one section." : n + " terms selected";
+    $("btnStart").disabled = n < 4;
+  }
+
+  function paintStand() {
+    var full = 0, half = 0, none = 0, n0 = 0, n1 = 0;
+    TERMS.forEach(function (t) {
+      var a = solid(t.id, 0), b = solid(t.id, 1);
+      if (a) n0++;
+      if (b) n1++;
+      if (a && b) full++; else if (a || b) half++; else none++;
+    });
+    $("standTiles").innerHTML =
+      tile(full + " / " + NT, "mastered both ways") +
+      tile(n0 + " / " + NT, "can name the term") +
+      tile(n1 + " / " + NT, "can define it") +
+      tile(none, "not started");
+    var taught = 0;
+    TERMS.forEach(function (t) { if (rec(t.id).tg) taught++; });
+    $("guidedNote").textContent = taught === 0
+      ? "Ten terms explained in plain English and read aloud, then multiple choice on those ten. Repeat, then the final test."
+      : taught >= NT
+        ? "You've been through all " + NT + ". Starting again from the beginning."
+        : "Picks up at term " + (taught + 1) + " of " + NT + ". Plain-English explanation read aloud, then multiple choice on each ten.";
+    $("tag").innerHTML = NT + " terms from your AI &amp; Modern Development glossary. " +
+      "Start with <b>Teach me first</b> if the definitions don't mean much yet — it explains each one, " +
+      "quizzes you on it, then tests you properly.";
+  }
+
+  function tile(big, small) {
+    return "<div class=\"tile\"><b>" + esc(big) + "</b><span>" + small + "</span></div>";
+  }
+
+  $("runBtns").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-run]");
+    if (!b) return;
+    runKind = b.getAttribute("data-run");
+    var btns = $("runBtns").querySelectorAll("button");
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute("aria-pressed", btns[i].getAttribute("data-run") === runKind ? "true" : "false");
+    }
+  });
+
+  $("selAll").addEventListener("click", function () {
+    SECTIONS.forEach(function (_, i) { chosen[i] = true; });
+    paintChips(); paintPool();
+  });
+  $("selNone").addEventListener("click", function () {
+    SECTIONS.forEach(function (_, i) { chosen[i] = false; });
+    paintChips(); paintPool();
+  });
+  $("selWeak").addEventListener("click", function () {
+    SECTIONS.forEach(function (_, i) {
+      chosen[i] = TERMS.some(function (t) { return t.sec === i && !isMastered(t.id); });
+    });
+    paintChips(); paintPool();
+  });
+
+  $("btnStart").addEventListener("click", function () { startRun(null); });
+  $("btnStats").addEventListener("click", openStats);
+  $("btnStats2").addEventListener("click", openStats);
+
+  /* ==========================================================
+     7 · BUILDING A RUN
+     ========================================================== */
+
+  function startRun(only) {
+    var src = (only && only.length) ? only.slice() : pool();
+    if (runKind === "guided") {
+      /* teaching follows the glossary's own order, and picks up where you
+         stopped — weakest-first would be incoherent for a lesson */
+      src = src.slice().sort(function (a, b) { return a.id - b.id; });
+      var fresh = src.filter(function (t) { return !rec(t.id).tg; });
+      if (fresh.length >= 1) src = fresh;
+    } else {
+      src = src.slice().sort(function (a, b) {
+        var d = weakness(b.id) - weakness(a.id);
+        return d !== 0 ? d : Math.random() - 0.5;
+      });
+    }
+
+    run = {
+      t0: Date.now(), kind: runKind,
+      batches: [], bi: 0, phase: "learn", li: 0,
+      queue: [], qi: 0, seen: [], rq: {},
+      asked: 0, right: 0, part: 0, streak: 0, best: 0,
+      misses: []
+    };
+
+    if (runKind === "mock") {
+      run.batches = [];
+      run.phase = "mock";
+      run.queue = buildMock(src);
+      run.seen = src.map(function (t) { return t.id; });
+      show("drill");
+      ask();
+      return;
+    }
+
+    for (var i = 0; i < src.length; i += BATCH) {
+      run.batches.push(src.slice(i, i + BATCH).map(function (t) { return t.id; }));
+    }
+    if (runKind === "guided") { beginTeach(); return; }
+    run.phase = runKind === "drillonly" ? "drill" : "learn";
+    run.li = 0;
+    if (run.phase === "drill") beginDrillBatch();
+    else { show("learn"); paintLearn(); }
+  }
+
+  /* ==========================================================
+     7b · TEACH MODE — narrated slides
+     ========================================================== */
+
+  var synth = window.speechSynthesis || null;
+  var voiceOn = !!synth;
+  var playing = true;
+  var speed = 1;
+  var slideToken = 0;
+  var slideTimer = null;
+
+  function stopSpeech() {
+    slideToken++;
+    if (slideTimer) { clearTimeout(slideTimer); slideTimer = null; }
+    if (synth) { try { synth.cancel(); } catch (e) {} }
+    var spk = $("tSpk");
+    if (spk) spk.textContent = "";
+  }
+
+  function beginTeach() {
+    run.phase = "teach";
+    run.li = 0;
+    playing = true;
+    show("teach");
+    paintSlide();
+  }
+
+  function teachIds() { return run.batches[run.bi] || []; }
+
+  function paintSlide() {
+    if (!run || run.phase !== "teach") return;
+    stopSpeech();
+    var ids = teachIds();
+    if (run.li >= ids.length) { nextPhase(); return; }
+    if (run.li < 0) run.li = 0;
+
+    var t = TERMS[ids[run.li]];
+    rec(t.id).tg = 1;
+    saveDb();
+
+    var done = 0;
+    TERMS.forEach(function (x) { if (rec(x.id).tg) done++; });
+
+    $("tSec").textContent = SECTIONS[t.sec];
+    $("tTerm").textContent = t.term;
+    $("tPlain").textContent = t.plain;
+    $("tDef").textContent = t.def;
+    $("tKeys").innerHTML = t.keys.map(function (k) {
+      return "<div class=\"keyline\"><span class=\"mk\">▪</span><span class=\"kt\">" + esc(k[0]) + "</span></div>";
+    }).join("");
+    $("tCount").textContent = "Term " + (run.li + 1) + " of " + ids.length +
+      " · batch " + (run.bi + 1) + " of " + run.batches.length + " · " + done + "/" + NT + " seen";
+    $("tProg").style.width = Math.round(((run.li + 1) / ids.length) * 100) + "%";
+    $("tPlay").textContent = playing ? "❚❚ Pause" : "▶ Play";
+
+    if (!synth) {
+      $("tWarn").classList.remove("hidden");
+      $("tWarn").textContent = "This browser has no built-in speech, so slides advance on a timer instead. Reading them yourself out loud works just as well.";
+      $("tVoice").classList.add("hidden");
+    }
+
+    if (playing) narrate(t);
+  }
+
+  function estimate(text) {
+    var words = text.split(/\s+/).length;
+    return Math.max(3200, (words / 2.6) * 1000) / speed;
+  }
+
+  function narrate(t) {
+    var mine = ++slideToken;
+    var script = t.term + ". " + t.plain + " The definition: " + t.def;
+    var advance = function () {
+      if (mine !== slideToken || !playing) return;
+      $("tSpk").textContent = "";
+      slideTimer = setTimeout(function () {
+        if (mine !== slideToken || !playing) return;
+        run.li++;
+        paintSlide();
+      }, 900);
+    };
+
+    if (!voiceOn || !synth) {
+      slideTimer = setTimeout(advance, estimate(script));
+      return;
+    }
+
+    $("tSpk").textContent = "● speaking";
+    var u = new window.SpeechSynthesisUtterance(script);
+    u.rate = speed;
+    u.lang = "en-GB";
+    u.onend = advance;
+    u.onerror = advance;
+    try {
+      synth.cancel();
+      synth.speak(u);
+    } catch (e) {
+      slideTimer = setTimeout(advance, estimate(script));
+      return;
+    }
+    /* some browsers never fire onend — a backstop so the lesson can't stall */
+    slideTimer = setTimeout(function () {
+      if (mine !== slideToken) return;
+      advance();
+    }, estimate(script) * 2.2 + 4000);
+  }
+
+  function togglePlay() {
+    playing = !playing;
+    $("tPlay").textContent = playing ? "❚❚ Pause" : "▶ Play";
+    if (playing) { paintSlide(); } else { stopSpeech(); }
+  }
+
+  $("tPlay").addEventListener("click", togglePlay);
+  $("tBack").addEventListener("click", function () { run.li = Math.max(0, run.li - 1); paintSlide(); });
+  $("tFwd").addEventListener("click", function () { run.li++; paintSlide(); });
+  $("tQuit").addEventListener("click", finishRun);
+  $("tQuiz").addEventListener("click", function () { stopSpeech(); beginMcqBatch(); });
+  $("tSpeed").addEventListener("change", function () {
+    speed = Number(this.value) || 1;
+    if (playing) paintSlide();
+  });
+  $("tVoice").addEventListener("click", function () {
+    voiceOn = !voiceOn;
+    this.setAttribute("aria-pressed", voiceOn ? "true" : "false");
+    this.textContent = voiceOn ? "🔊 Voice on" : "🔇 Voice off";
+    if (playing) paintSlide();
+  });
+
+  /* multiple choice over the batch just taught */
+  function beginMcqBatch() {
+    var ids = teachIds();
+    var qs = [];
+    ids.forEach(function (id, i) {
+      qs.push({ id: id, dir: i % 2, kind: i % 2 ? "mcq-def" : "mcq-term" });
+    });
+    run.queue = shuffle(qs);
+    run.qi = 0;
+    run.phase = "mcq";
+    show("drill");
+    ask();
+  }
+
+  function beginDrillBatch() {
+    var ids = run.batches[run.bi];
+    var qs = [];
+    ids.forEach(function (id) {
+      qs.push({ id: id, dir: 0, kind: "type-term" });
+      qs.push({ id: id, dir: 1, kind: "type-def" });
+    });
+    run.queue = shuffle(qs);
+    run.qi = 0;
+    run.phase = "drill";
+    show("drill");
+    ask();
+  }
+
+  function beginMix() {
+    var ids = run.seen.slice();
+    if (!ids.length) { nextPhase(); return; }
+    var sorted = ids.slice().sort(function (a, b) {
+      var d = weakness(b) - weakness(a);
+      return d !== 0 ? d : Math.random() - 0.5;
+    });
+    var qs = [];
+    var n = Math.min(MIXLEN, sorted.length * 2);
+    for (var i = 0; i < n; i++) {
+      var id = sorted[i % sorted.length];
+      qs.push({ id: id, dir: i % 2, kind: i % 2 ? "type-def" : "type-term" });
+    }
+    run.queue = shuffle(qs);
+    run.qi = 0;
+    run.phase = "mix";
+    show("drill");
+    ask();
+  }
+
+  function buildMock(src) {
+    var ids = (src ? src.map(function (t) { return t.id; }) : run.seen).slice();
+    ids = shuffle(ids);
+    var qs = [], n = Math.min(MOCKLEN, Math.max(ids.length, 1) * 2);
+    for (var i = 0; i < n; i++) {
+      var id = ids[i % ids.length];
+      var r = i % 10;
+      var kind, dir;
+      if (r < 3) { kind = "mcq-term"; dir = 0; }
+      else if (r < 4) { kind = "mcq-def"; dir = 1; }
+      else if (r < 7) { kind = "type-term"; dir = 0; }
+      else { kind = "type-def"; dir = 1; }
+      qs.push({ id: id, dir: dir, kind: kind });
+    }
+    return shuffle(qs);
+  }
+
+  function beginMock() {
+    run.queue = buildMock(null);
+    run.qi = 0;
+    run.phase = "mock";
+    show("drill");
+    ask();
+  }
+
+  /* what happens when the current queue empties */
+  function nextPhase() {
+    if (run.phase === "teach") { beginMcqBatch(); return; }
+
+    if (run.phase === "mcq") {
+      run.batches[run.bi].forEach(function (id) {
+        if (run.seen.indexOf(id) === -1) run.seen.push(id);
+      });
+      showBatchDone(run.bi >= run.batches.length - 1 ? "mock" : "next");
+      return;
+    }
+
+    if (run.phase === "learn") { beginDrillBatch(); return; }
+
+    if (run.phase === "drill") {
+      run.batches[run.bi].forEach(function (id) {
+        if (run.seen.indexOf(id) === -1) run.seen.push(id);
+      });
+      var last = run.bi >= run.batches.length - 1;
+      var mixDue = !last && ((run.bi + 1) % MIXEVERY === 0);
+      showBatchDone(last ? "mock" : (mixDue ? "mix" : "next"));
+      return;
+    }
+
+    if (run.phase === "mix") {
+      var wasLast = run.bi >= run.batches.length - 1;
+      showBatchDone(wasLast ? "mock" : "next");
+      return;
+    }
+
+    finishRun();
+  }
+
+  function showBatchDone(then) {
+    run.pending = then;
+    var pct = run.asked ? Math.round((run.right / run.asked) * 100) : 0;
+    var guided = run.kind === "guided";
+    $("bdLabel").textContent = run.phase === "mix" ? "Mixed review done"
+      : run.phase === "mcq" ? "Ten down" : "Batch clear";
+    $("bdPct").textContent = pct + "%";
+    var line;
+    if (then === "mix") line = "Every term in this batch is right both ways. Next: a mixed review over everything so far — this is the part that makes it stick.";
+    else if (then === "mock") line = "That's all of them taught and quizzed. Next: the final test — " + MOCKLEN +
+      " questions mixing multiple choice with typing, and no feedback until the end.";
+    else line = guided ? "Next ten terms explained." : "Next batch of " + BATCH + ".";
+    $("bdLine").textContent = line + " " + run.right + " of " + run.asked + " right so far.";
+    $("bdNext").textContent = then === "mock" ? "Start the final test"
+      : (then === "mix" ? "Start mixed review" : (guided ? "Teach me the next ten" : "Next batch"));
+    paintRail($("bRail"));
+    show("batchdone");
+    $("bdNext").focus();
+  }
+
+  $("bdNext").addEventListener("click", function () {
+    var then = run.pending;
+    if (then === "mix") { beginMix(); return; }
+    if (then === "mock") { beginMock(); return; }
+    run.bi++;
+    if (run.kind === "guided") beginTeach();
+    else if (run.kind === "drillonly") beginDrillBatch();
+    else { run.phase = "learn"; run.li = 0; show("learn"); paintLearn(); }
+  });
+  $("bdEnd").addEventListener("click", finishRun);
+
+  function paintRail(el) {
+    if (!el || !run) return;
+    var parts = [];
+    var nb = run.batches.length;
+    if (run.kind === "guided") {
+      parts.push(["Batch " + (run.bi + 1) + (nb ? " / " + nb : ""), false]);
+      parts.push(["Taught", run.phase === "teach"]);
+      parts.push(["Multiple choice", run.phase === "mcq"]);
+      parts.push(["Final test", run.phase === "mock"]);
+    } else {
+      parts.push(["Batch " + (run.bi + 1) + (nb ? " / " + nb : ""), run.phase === "learn" || run.phase === "drill"]);
+      parts.push(["Mix", run.phase === "mix"]);
+      parts.push(["Mock", run.phase === "mock"]);
+    }
+    el.innerHTML = parts.map(function (p, i) {
+      return (i ? "<span class=\"sep\">·</span>" : "") +
+        "<span class=\"step" + (p[1] ? " on" : "") + "\">" + esc(p[0]) + "</span>";
+    }).join("");
+  }
+
+  /* ==========================================================
+     8 · LEARN PHASE
+     ========================================================== */
+
+  function paintLearn() {
+    var ids = run.batches[run.bi];
+    if (run.li >= ids.length) { nextPhase(); return; }
+    var t = TERMS[ids[run.li]];
+    $("lBatch").textContent = (run.bi + 1) + " / " + run.batches.length;
+    $("lCard").textContent = (run.li + 1) + " / " + ids.length;
+    $("lProg").style.width = Math.round((run.li / ids.length) * 100) + "%";
+    $("lSec").textContent = SECTIONS[t.sec];
+    $("lTerm").textContent = t.term;
+    $("lDef").textContent = t.def;
+    $("lKeys").innerHTML = t.keys.map(function (k) {
+      return "<div class=\"keyline\"><span class=\"mk\">▪</span><span class=\"kt\">" + esc(k[0]) + "</span></div>";
+    }).join("");
+    $("lNext").textContent = run.li === ids.length - 1 ? "Start drilling these 10" : "Next card";
+    paintRail($("lRail"));
+    $("lNext").focus();
+  }
+
+  $("lNext").addEventListener("click", function () { run.li++; paintLearn(); });
+  $("lQuit").addEventListener("click", finishRun);
+
+  /* ==========================================================
+     9 · ASKING
+     ========================================================== */
+
+  function distractors(t, n, byDef) {
+    var same = TERMS.filter(function (x) { return x.sec === t.sec && x.id !== t.id; });
+    var other = TERMS.filter(function (x) { return x.sec !== t.sec; });
+    var picked = shuffle(same).slice(0, n);
+    if (picked.length < n) picked = picked.concat(shuffle(other).slice(0, n - picked.length));
+    return picked;
+  }
+
+  function ask() {
+    if (run.qi >= run.queue.length) { nextPhase(); return; }
+    answered = false;
+    current = run.queue[run.qi];
+    var t = TERMS[current.id];
+    var isMock = run.phase === "mock";
+
+    $("verdict").classList.add("hidden");
+    $("btnNext").classList.add("hidden");
+    $("opts").classList.add("hidden");
+    $("typerow").classList.add("hidden");
+    $("defrow").classList.add("hidden");
+    $("opts").innerHTML = "";
+
+    $("hLabel").textContent = isMock ? "Mock Q" : "Question";
+    $("hQ").textContent = (run.qi + 1) + (isMock ? " / " + run.queue.length : "");
+    $("hC").textContent = run.right;
+    $("hS").textContent = run.streak;
+    $("hS").className = run.streak >= 5 ? "hot" : "";
+    $("hL").textContent = Math.max(0, run.queue.length - run.qi);
+    $("prog").style.width = Math.round((run.qi / run.queue.length) * 100) + "%";
+    paintRail($("dRail"));
+
+    var tagEl = $("qtag");
+    tagEl.className = "qtag" + (current.dir ? " b2" : "");
+    $("qsec").textContent = SECTIONS[t.sec];
+
+    if (current.kind === "type-term") {
+      tagEl.textContent = "Name the term";
+      $("prompt").className = "prompt";
+      $("prompt").textContent = t.def;
+      $("typerow").classList.remove("hidden");
+      $("typeIn").value = "";
+      $("typeIn").focus();
+      $("kbHint").innerHTML = "<kbd>Enter</kbd> check";
+    } else if (current.kind === "type-def") {
+      tagEl.textContent = "Define it";
+      $("prompt").className = "prompt term";
+      $("prompt").textContent = t.term;
+      $("defrow").classList.remove("hidden");
+      $("defIn").value = "";
+      $("defIn").focus();
+      $("kbHint").innerHTML = "";
+    } else if (current.kind === "mcq-term") {
+      tagEl.textContent = "Pick the term";
+      $("prompt").className = "prompt";
+      $("prompt").textContent = t.def;
+      paintOpts(t, distractors(t, 3), function (x) { return x.term; }, true);
+      $("kbHint").innerHTML = "<kbd>1</kbd>–<kbd>4</kbd> answer";
+    } else {
+      tagEl.textContent = "Pick the definition";
+      $("prompt").className = "prompt term";
+      $("prompt").textContent = t.term;
+      paintOpts(t, distractors(t, 3), function (x) { return firstSentence(x.def); }, false);
+      $("kbHint").innerHTML = "<kbd>1</kbd>–<kbd>4</kbd> answer";
+    }
+  }
+
+  var optOrder = [];
+
+  function paintOpts(t, ds, text, mono) {
+    var all = shuffle([t].concat(ds));
+    optOrder = all;
+    var box = $("opts");
+    box.classList.remove("hidden");
+    box.innerHTML = all.map(function (x, i) {
+      return "<button class=\"opt\" data-i=\"" + i + "\"><kbd>" + (i + 1) + "</kbd>" +
+        "<span class=\"txt" + (mono ? " mono" : "") + "\">" + esc(text(x)) + "</span></button>";
+    }).join("");
+  }
+
+  $("opts").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-i]");
+    if (!b || answered) return;
+    pickOpt(Number(b.getAttribute("data-i")));
+  });
+
+  function pickOpt(i) {
+    if (answered || !optOrder[i]) return;
+    var t = TERMS[current.id];
+    var v = optOrder[i].id === t.id ? 2 : 0;
+    if (run.phase === "mock") {
+      var btns = $("opts").querySelectorAll(".opt");
+      for (var k = 0; k < btns.length; k++) btns[k].setAttribute("data-state", "muted");
+      record(v, "");
+      return;
+    }
+    var btns2 = $("opts").querySelectorAll(".opt");
+    for (var j = 0; j < btns2.length; j++) {
+      var oid = optOrder[j].id;
+      if (oid === t.id) btns2[j].setAttribute("data-state", "right");
+      else if (j === i) btns2[j].setAttribute("data-state", "wrong");
+      else btns2[j].setAttribute("data-state", "muted");
+    }
+    record(v, "");
+  }
+
+  $("btnCheck").addEventListener("click", submitTerm);
+  $("btnCheckDef").addEventListener("click", submitDef);
+
+  function submitTerm() {
+    if (answered) return;
+    var t = TERMS[current.id];
+    var g = gradeTerm($("typeIn").value, t);
+    record(g.v, g.note, esc($("typeIn").value));
+  }
+
+  function submitDef() {
+    if (answered) return;
+    var t = TERMS[current.id];
+    var g = gradeDef($("defIn").value, t);
+    record(g.v, "", esc($("defIn").value), g);
+  }
+
+  /* record an answer, show feedback (unless mock), maybe requeue */
+  function record(v, note, yours, g) {
+    answered = true;
+    lastVerdict = v;
+    var t = TERMS[current.id];
+    run.asked++;
+    if (v >= 2) { run.right++; run.streak++; if (run.streak > run.best) run.best = run.streak; }
+    else { run.streak = 0; if (v === 1) run.part++; }
+    score(t.id, current.dir, v);
+
+    if (v < 2) {
+      run.misses.push({ id: t.id, dir: current.dir, v: v });
+      if (run.phase !== "mock") requeue();
+    }
+
+    if (run.phase === "mock") { run.qi++; ask(); return; }
+
+    var vd = $("verdict");
+    vd.className = "verdict " + (v === 2 ? "right" : v === 1 ? "partial" : "wrong");
+    $("vHead").textContent = v === 2 ? "Correct" : v === 1 ? "Partly there" : "Not yet";
+    $("vTerm").textContent = t.term;
+    $("vDef").textContent = t.def;
+    $("vSec").textContent = SECTIONS[t.sec] + (note ? " — " + note : "");
+
+    var yEl = $("vYours"), kEl = $("vKeys");
+    if (g) {
+      kEl.classList.remove("hidden");
+      kEl.innerHTML = t.keys.map(function (k, i) {
+        var m = g.got[i];
+        return "<div class=\"keyline " + (m ? "k-hit" : "k-miss") + "\">" +
+          "<span class=\"mk\">" + (m ? "✓" : "✗") + "</span>" +
+          "<span class=\"kt\">" + esc(k[0]) +
+          (m ? " <span class=\"got\">— you said “" + esc(m) + "”</span>" : "") +
+          "</span></div>";
+      }).join("");
+      $("vHead").textContent += "  ·  " + g.hit + " of " + g.of + " ideas";
+    } else {
+      kEl.classList.add("hidden");
+    }
+    if (yours) {
+      yEl.classList.remove("hidden");
+      yEl.innerHTML = "You wrote: " + yours;
+    } else {
+      yEl.classList.add("hidden");
+    }
+
+    vd.classList.remove("hidden");
+    $("btnNext").classList.remove("hidden");
+    $("btnNext").textContent = run.qi >= run.queue.length - 1 ? "Finish" : "Next";
+    $("kbHint").innerHTML = v < 2
+      ? "<kbd>Enter</kbd> next · <kbd>O</kbd> I had it, override"
+      : "<kbd>Enter</kbd> next";
+    $("btnNext").focus();
+  }
+
+  /* a miss comes back inside the same session, a few questions later — but only
+     so many times, so a term you simply can't get can't trap you in a batch */
+  var RETRIES = 3;
+
+  function requeue() {
+    var k = current.id + ":" + current.dir;
+    run.rq[k] = (run.rq[k] || 0) + 1;
+    if (run.rq[k] > RETRIES) return;
+    var at = Math.min(run.qi + 3, run.queue.length);
+    run.queue.splice(at, 0, { id: current.id, dir: current.dir, kind: current.kind });
+  }
+
+  function override() {
+    if (!answered || lastVerdict >= 2 || run.phase === "mock") return;
+    var t = TERMS[current.id];
+    // undo the miss
+    var e = rec(t.id);
+    if (current.dir) { e.w1 = Math.max(0, e.w1 - 1); } else { e.w0 = Math.max(0, e.w0 - 1); }
+    if (db.ev.length) db.ev.pop();
+    for (var i = run.misses.length - 1; i >= 0; i--) {
+      if (run.misses[i].id === t.id && run.misses[i].dir === current.dir) { run.misses.splice(i, 1); break; }
+    }
+    for (i = run.queue.length - 1; i > run.qi; i--) {
+      if (run.queue[i].id === t.id && run.queue[i].dir === current.dir) { run.queue.splice(i, 1); break; }
+    }
+    if (lastVerdict === 1) run.part = Math.max(0, run.part - 1);
+    run.asked--;
+    score(t.id, current.dir, 3);
+    run.asked++;
+    run.right++;
+    run.streak++;
+    if (run.streak > run.best) run.best = run.streak;
+    lastVerdict = 3;
+    $("verdict").className = "verdict right";
+    $("vHead").textContent = "Counted as correct (your call)";
+    $("hC").textContent = run.right;
+    $("hS").textContent = run.streak;
+    $("kbHint").innerHTML = "<kbd>Enter</kbd> next";
+  }
+
+  $("btnNext").addEventListener("click", function () { run.qi++; ask(); });
+  $("btnQuit").addEventListener("click", finishRun);
+
+  /* ==========================================================
+     10 · RESULTS
+     ========================================================== */
+
+  function finishRun() {
+    if (!run) { show("setup"); return; }
+    var pct = run.asked ? Math.round((run.right / run.asked) * 100) : 0;
+    db.ss.push({
+      t0: run.t0, t1: Date.now(), asked: run.asked, right: run.right,
+      part: run.part, kind: run.phase === "mock" ? "mock" : run.kind
+    });
+    saveDb();
+
+    $("rLabel").textContent = run.phase === "mock" ? "Mock exam result" : "Run complete";
+    $("rPct").textContent = pct + "%";
+    $("rPct").style.color = pct === 100 ? "var(--ok)" : pct >= 80 ? "" : "var(--no)";
+    var mins = Math.max(1, Math.round((Date.now() - run.t0) / 60000));
+    $("rLine").textContent = run.right + " of " + run.asked + " in " + mins + " min" +
+      (run.best > 1 ? " · best streak " + run.best : "");
+
+    var solidBoth = 0;
+    TERMS.forEach(function (t) { if (isMastered(t.id)) solidBoth++; });
+    $("rTiles").innerHTML =
+      tile(pct + "%", "this run") +
+      tile(String(run.part), "partly right") +
+      tile(String(uniqueMisses().length), "terms still shaky") +
+      tile(solidBoth + " / " + NT, "mastered both ways");
+
+    var um = uniqueMisses();
+    if (!um.length) {
+      $("missWrap").innerHTML = "<div class=\"nodata\">Nothing missed. Do a mock exam to confirm it holds under pressure.</div>";
+      $("btnAgain").classList.add("hidden");
+    } else {
+      $("btnAgain").classList.remove("hidden");
+      $("missWrap").innerHTML = "<div class=\"label\" style=\"margin-bottom:6px\">Get these before the test</div>" +
+        "<div class=\"misses\">" + um.map(function (m) {
+          var t = TERMS[m.id];
+          return "<div class=\"miss\"><div><span class=\"t\">" + esc(t.term) + "</span>" +
+            "<span class=\"dirtag\">" + (m.dirs.length === 2 ? "both ways" : m.dirs[0] ? "couldn't define it" : "couldn't name it") +
+            "</span></div><div class=\"d\">" + esc(t.def) + "</div></div>";
+        }).join("") + "</div>";
+    }
+
+    paintStand(); paintChips();
+    show("done");
+  }
+
+  function uniqueMisses() {
+    var by = {};
+    run.misses.forEach(function (m) {
+      if (!by[m.id]) by[m.id] = { id: m.id, dirs: [] };
+      if (by[m.id].dirs.indexOf(m.dir) === -1) by[m.id].dirs.push(m.dir);
+    });
+    return Object.keys(by).map(function (k) { return by[k]; });
+  }
+
+  $("btnAgain").addEventListener("click", function () {
+    var ids = uniqueMisses().map(function (m) { return TERMS[m.id]; });
+    if (!ids.length) return;
+    runKind = "drillonly";
+    startRun(ids);
+  });
+  $("btnHome").addEventListener("click", function () {
+    paintStand(); paintChips(); paintPool(); show("setup");
+  });
+
+  /* ==========================================================
+     11 · KEYBOARD
+     ========================================================== */
+
+  document.addEventListener("keydown", function (e) {
+    var teaching = !$("teach").classList.contains("hidden");
+    var learning = !$("learn").classList.contains("hidden");
+    var drilling = !$("drill").classList.contains("hidden");
+    var batching = !$("batchdone").classList.contains("hidden");
+
+    if (e.key === "Escape" && (teaching || learning || drilling || batching)) {
+      e.preventDefault(); finishRun(); return;
+    }
+    if (teaching) {
+      if (e.key === " ") { e.preventDefault(); togglePlay(); return; }
+      if (e.key === "ArrowRight") { e.preventDefault(); run.li++; paintSlide(); return; }
+      if (e.key === "ArrowLeft") { e.preventDefault(); run.li = Math.max(0, run.li - 1); paintSlide(); return; }
+      if (e.key === "q" || e.key === "Q") { e.preventDefault(); stopSpeech(); beginMcqBatch(); return; }
+      return;
+    }
+    if (learning && e.key === "Enter") { e.preventDefault(); run.li++; paintLearn(); return; }
+    if (batching && e.key === "Enter") { e.preventDefault(); $("bdNext").click(); return; }
+    if (!drilling) return;
+
+    if (!answered) {
+      if (current && current.kind === "type-term" && e.key === "Enter") { e.preventDefault(); submitTerm(); return; }
+      if (current && current.kind === "type-def" && e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitDef(); return; }
+      if (current && current.kind.indexOf("mcq") === 0 && /^[1-4]$/.test(e.key)) {
+        e.preventDefault(); pickOpt(Number(e.key) - 1); return;
+      }
+      return;
+    }
+    if (e.key === "Enter") { e.preventDefault(); run.qi++; ask(); return; }
+    if ((e.key === "o" || e.key === "O") && lastVerdict < 2) { e.preventDefault(); override(); }
+  });
+
+  /* ==========================================================
+     12 · STATS & CHARTS
+     ========================================================== */
+
+  var tip = $("tip");
+
+  function bindTips(root) {
+    root.querySelectorAll("[data-tip]").forEach(function (el) {
+      el.addEventListener("mouseenter", function () {
+        tip.innerHTML = el.getAttribute("data-tip");
+        tip.classList.add("on");
+      });
+      el.addEventListener("mousemove", function (ev) {
+        var w = tip.offsetWidth, h = tip.offsetHeight;
+        var x = ev.clientX + 14, y = ev.clientY - h - 10;
+        if (x + w > window.innerWidth - 8) x = ev.clientX - w - 14;
+        if (y < 8) y = ev.clientY + 16;
+        tip.style.left = x + "px";
+        tip.style.top = y + "px";
+      });
+      el.addEventListener("mouseleave", function () { tip.classList.remove("on"); });
+    });
+  }
+
+  function openStats() {
+    paintStats();
+    show("stats");
+  }
+  $("stBack").addEventListener("click", function () {
+    paintStand(); paintChips(); paintPool(); show("setup");
+  });
+  $("stWipe").addEventListener("click", function () {
+    if (!window.confirm("Delete all progress, sessions and charts? This can't be undone.")) return;
+    db = blank();
+    try { window.localStorage.removeItem(OLDKEY); } catch (e) {}
+    saveDb();
+    paintStats(); paintStand(); paintChips();
+  });
+
+  /* ---- chart primitives (inline SVG, no libraries) ---- */
+
+  function lineFig(title, sub, pts, empty) {
+    if (pts.length < 2) {
+      return fig(title, sub, "<div class=\"nodata\">" + empty + "</div>");
+    }
+    var W = 720, H = 220, L = 34, R = 12, T = 12, B = 26;
+    var iw = W - L - R, ih = H - T - B;
+    var x = function (i) { return L + (pts.length === 1 ? iw / 2 : (i / (pts.length - 1)) * iw); };
+    var y = function (v) { return T + ih - (Math.max(0, Math.min(100, v)) / 100) * ih; };
+
+    var s = "<svg viewBox=\"0 0 " + W + " " + H + "\" role=\"img\" aria-label=\"" + esc(title) + "\">";
+    [0, 25, 50, 75, 100].forEach(function (g) {
+      s += "<line x1=\"" + L + "\" y1=\"" + y(g) + "\" x2=\"" + (W - R) + "\" y2=\"" + y(g) +
+        "\" stroke=\"var(--grid)\" stroke-width=\"1\"/>";
+      if (g % 50 === 0) {
+        s += "<text x=\"" + (L - 7) + "\" y=\"" + (y(g) + 3.5) + "\" text-anchor=\"end\" " +
+          "font-family=\"var(--mono)\" font-size=\"10\" fill=\"var(--dim)\">" + g + "</text>";
+      }
+    });
+
+    var d = pts.map(function (p, i) { return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(p.v).toFixed(1); }).join(" ");
+    s += "<path d=\"" + d + " L" + x(pts.length - 1).toFixed(1) + " " + y(0) + " L" + x(0).toFixed(1) + " " + y(0) +
+      " Z\" fill=\"var(--s1)\" opacity=\"0.10\"/>";
+    s += "<path d=\"" + d + "\" fill=\"none\" stroke=\"var(--s1)\" stroke-width=\"2\" stroke-linejoin=\"round\"/>";
+
+    pts.forEach(function (p, i) {
+      var last = i === pts.length - 1;
+      s += "<circle cx=\"" + x(i).toFixed(1) + "\" cy=\"" + y(p.v).toFixed(1) + "\" r=\"" + (last ? 5 : 4) +
+        "\" fill=\"" + (last ? "var(--s1)" : "var(--panel)") + "\" stroke=\"var(--s1)\" stroke-width=\"2\"/>";
+    });
+    // last value labelled directly, not every point
+    var lp = pts[pts.length - 1];
+    s += "<text x=\"" + (x(pts.length - 1) - 8) + "\" y=\"" + (y(lp.v) - 12) + "\" text-anchor=\"end\" " +
+      "font-family=\"var(--mono)\" font-size=\"12\" font-weight=\"700\" fill=\"var(--text)\">" + lp.v + "%</text>";
+
+    s += "<text x=\"" + L + "\" y=\"" + (H - 7) + "\" font-family=\"var(--mono)\" font-size=\"10\" fill=\"var(--dim)\">" +
+      esc(pts[0].x) + "</text>";
+    s += "<text x=\"" + (W - R) + "\" y=\"" + (H - 7) + "\" text-anchor=\"end\" font-family=\"var(--mono)\" font-size=\"10\" fill=\"var(--dim)\">" +
+      esc(lp.x) + "</text>";
+
+    // hover targets
+    var bw = iw / pts.length;
+    pts.forEach(function (p, i) {
+      s += "<rect x=\"" + (x(i) - bw / 2).toFixed(1) + "\" y=\"" + T + "\" width=\"" + bw.toFixed(1) + "\" height=\"" + ih +
+        "\" fill=\"transparent\" data-tip=\"<b>" + esc(p.x) + "</b><br>" + p.v + "% · " + esc(p.note || "") + "\"/>";
+    });
+    s += "</svg>";
+    return fig(title, sub, "<div class=\"plot\">" + s + "</div>");
+  }
+
+  function hbarFig(title, sub, rows) {
+    if (!rows.length) return fig(title, sub, "<div class=\"nodata\">No data yet.</div>");
+    var W = 720, rowH = 26, L = 196, R = 46, T = 4;
+    var H = T * 2 + rows.length * rowH;
+    var iw = W - L - R;
+    var s = "<svg viewBox=\"0 0 " + W + " " + H + "\" role=\"img\" aria-label=\"" + esc(title) + "\">";
+    rows.forEach(function (r, i) {
+      var cy = T + i * rowH, by = cy + 6, bh = 13;
+      s += "<text x=\"0\" y=\"" + (by + 10) + "\" font-family=\"var(--mono)\" font-size=\"11\" fill=\"var(--dim)\">" +
+        esc(r.label.length > 25 ? r.label.slice(0, 24) + "…" : r.label) + "</text>";
+      s += "<rect x=\"" + L + "\" y=\"" + by + "\" width=\"" + iw + "\" height=\"" + bh + "\" fill=\"var(--sunk)\"/>";
+      var w = Math.max(0, (r.pct / 100) * iw);
+      if (w > 0) {
+        s += "<rect x=\"" + L + "\" y=\"" + by + "\" width=\"" + w.toFixed(1) + "\" height=\"" + bh +
+          "\" rx=\"3\" fill=\"var(--accent)\" data-tip=\"<b>" + esc(r.label) + "</b><br>" + r.pct + "% · " + esc(r.note) + "\"/>";
+      }
+      s += "<text x=\"" + W + "\" y=\"" + (by + 11) + "\" text-anchor=\"end\" font-family=\"var(--mono)\" font-size=\"11.5\" " +
+        "fill=\"var(--text)\">" + r.pct + "%</text>";
+    });
+    s += "</svg>";
+    return fig(title, sub, "<div class=\"plot\">" + s + "</div>");
+  }
+
+  function pairFig(title, sub, rows) {
+    if (!rows.length) return fig(title, sub, "<div class=\"nodata\">No data yet.</div>");
+    var W = 720, rowH = 34, L = 196, R = 46, T = 4;
+    var H = T * 2 + rows.length * rowH;
+    var iw = W - L - R, bh = 11;
+    var s = "<svg viewBox=\"0 0 " + W + " " + H + "\" role=\"img\" aria-label=\"" + esc(title) + "\">";
+    rows.forEach(function (r, i) {
+      var top = T + i * rowH + 4;
+      s += "<text x=\"0\" y=\"" + (top + 16) + "\" font-family=\"var(--mono)\" font-size=\"11\" fill=\"var(--dim)\">" +
+        esc(r.label.length > 25 ? r.label.slice(0, 24) + "…" : r.label) + "</text>";
+      [[r.a, "var(--s1)", "can name it", 0], [r.b, "var(--s2)", "can define it", bh + 2]].forEach(function (p) {
+        var by = top + p[3];
+        s += "<rect x=\"" + L + "\" y=\"" + by + "\" width=\"" + iw + "\" height=\"" + bh + "\" fill=\"var(--sunk)\"/>";
+        var w = Math.max(0, (p[0] / 100) * iw);
+        if (w > 0) {
+          s += "<rect x=\"" + L + "\" y=\"" + by + "\" width=\"" + w.toFixed(1) + "\" height=\"" + bh +
+            "\" rx=\"3\" fill=\"" + p[1] + "\" data-tip=\"<b>" + esc(r.label) + "</b><br>" + p[2] + ": " + p[0] + "%\"/>";
+        }
+      });
+      s += "<text x=\"" + W + "\" y=\"" + (top + 10) + "\" text-anchor=\"end\" font-family=\"var(--mono)\" font-size=\"11\" fill=\"var(--text)\">" + r.a + "%</text>";
+      s += "<text x=\"" + W + "\" y=\"" + (top + 10 + bh + 2) + "\" text-anchor=\"end\" font-family=\"var(--mono)\" font-size=\"11\" fill=\"var(--text)\">" + r.b + "%</text>";
+    });
+    s += "</svg>";
+    var legend = "<div class=\"legend\"><span><i style=\"background:var(--s1)\"></i>Can name the term</span>" +
+      "<span><i style=\"background:var(--s2)\"></i>Can define it</span></div>";
+    return fig(title, sub, legend + "<div class=\"plot\">" + s + "</div>");
+  }
+
+  function fig(title, sub, body) {
+    return "<div class=\"fig\"><div class=\"ftitle\">" + esc(title) + "</div>" +
+      "<div class=\"fsub\">" + sub + "</div>" + body + "</div>";
+  }
+
+  function dayStr(ts) {
+    var d = new Date(ts);
+    return d.getDate() + "/" + (d.getMonth() + 1);
+  }
+  function timeStr(ts) {
+    var d = new Date(ts);
+    return d.getHours() + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
+
+  function paintStats() {
+    var n0 = 0, n1 = 0, both = 0;
+    TERMS.forEach(function (t) {
+      var a = solid(t.id, 0), b = solid(t.id, 1);
+      if (a) n0++; if (b) n1++; if (a && b) both++;
+    });
+    var ans = db.ev.length;
+    var rights = db.ev.filter(function (e) { return e[3] >= 2; }).length;
+    var overs = db.ev.filter(function (e) { return e[3] === 3; }).length;
+    var last20 = db.ev.slice(-20);
+    var l20 = last20.length ? Math.round(last20.filter(function (e) { return e[3] >= 2; }).length / last20.length * 100) : 0;
+
+    $("stTiles").innerHTML =
+      tile(both + " / " + NT, "mastered both ways") +
+      tile(Math.round((both / NT) * 100) + "%", "of the glossary test-ready") +
+      tile(l20 + "%", "accuracy, last 20 answers") +
+      tile(String(ans), "answers logged" + (overs ? " · " + overs + " overridden" : ""));
+
+    var figs = [];
+
+    /* 1 · accuracy by session */
+    var sess = db.ss.filter(function (s) { return s.asked >= 4; });
+    figs.push(lineFig(
+      "Accuracy by session",
+      "Each finished session, oldest first. This is the “am I improving” line — what you want is the right-hand end climbing and staying above 90%.",
+      sess.map(function (s) {
+        return {
+          x: dayStr(s.t0) + " " + timeStr(s.t0),
+          v: Math.round((s.right / s.asked) * 100),
+          note: s.right + "/" + s.asked + " · " + s.kind
+        };
+      }),
+      "Two finished sessions and this line appears. It's the one to watch tonight."
+    ));
+
+    /* 2 · today's curve, per block of 20 answers */
+    var midnight = new Date(); midnight.setHours(0, 0, 0, 0);
+    var today = db.ev.filter(function (e) { return e[0] >= midnight.getTime(); });
+    var blocks = [];
+    for (var i = 0; i < today.length; i += 20) {
+      var b = today.slice(i, i + 20);
+      if (b.length < 5) break;
+      blocks.push({
+        x: "Q" + (i + 1) + "–" + (i + b.length),
+        v: Math.round(b.filter(function (e) { return e[3] >= 2; }).length / b.length * 100),
+        note: b.filter(function (e) { return e[3] >= 2; }).length + "/" + b.length + " right"
+      });
+    }
+    figs.push(lineFig(
+      "Today, in blocks of 20 answers",
+      "Your cram curve for today only. Early blocks are meant to be ugly; what matters is the later blocks sitting higher than the earlier ones.",
+      blocks,
+      "Answer about 40 questions today and your curve for the day shows up here."
+    ));
+
+    /* 3 · mastery by section */
+    figs.push(hbarFig(
+      "Mastered by section",
+      "A term counts here only when you can both name it and define it, twice running.",
+      SECTIONS.map(function (name, si) {
+        var all = TERMS.filter(function (t) { return t.sec === si; });
+        var m = all.filter(function (t) { return isMastered(t.id); }).length;
+        return { label: name, pct: Math.round((m / all.length) * 100), note: m + " of " + all.length + " terms" };
+      })
+    ));
+
+    /* 4 · the two directions, side by side */
+    figs.push(pairFig(
+      "Naming vs. defining, by section",
+      "Recognising a term is far easier than defining it. Wherever the lower bar lags badly, that's where a “define this” question would catch you out.",
+      SECTIONS.map(function (name, si) {
+        var all = TERMS.filter(function (t) { return t.sec === si; });
+        var a = all.filter(function (t) { return solid(t.id, 0); }).length;
+        var b = all.filter(function (t) { return solid(t.id, 1); }).length;
+        return {
+          label: name,
+          a: Math.round((a / all.length) * 100),
+          b: Math.round((b / all.length) * 100)
+        };
+      })
+    ));
+
+    /* 5 · weakest terms, as a table */
+    var weak = TERMS.slice().filter(function (t) {
+      var e = rec(t.id);
+      return (e.w0 + e.w1) > 0 || !isMastered(t.id);
+    }).sort(function (a, b) { return weakness(b.id) - weakness(a.id); }).slice(0, 12);
+
+    var tbl = "<div class=\"plot\"><table class=\"data\"><thead><tr><th>Term</th><th>Section</th>" +
+      "<th>Name it</th><th>Define it</th><th style=\"text-align:right\">Missed</th></tr></thead><tbody>" +
+      weak.map(function (t) {
+        var e = rec(t.id);
+        return "<tr><td class=\"tm\">" + esc(t.term) + "</td>" +
+          "<td style=\"color:var(--dim)\">" + esc(SECTIONS[t.sec]) + "</td>" +
+          "<td>" + (solid(t.id, 0) ? "<span style=\"color:var(--ok)\">solid</span>" : e.s0 + "/" + MASTER) + "</td>" +
+          "<td>" + (solid(t.id, 1) ? "<span style=\"color:var(--ok)\">solid</span>" : e.s1 + "/" + MASTER) + "</td>" +
+          "<td class=\"n\">" + (e.w0 + e.w1) + "</td></tr>";
+      }).join("") + "</tbody></table></div>";
+
+    figs.push(fig("Your weakest terms",
+      "Ranked by how much work they still need. " +
+      (weak.length ? "<button class=\"small\" id=\"drillWeak\" style=\"margin-top:10px\">Drill these " + weak.length + "</button>" : ""),
+      weak.length ? tbl : "<div class=\"nodata\">Nothing weak on record yet.</div>"));
+
+    $("figs").innerHTML = figs.join("");
+    bindTips($("figs"));
+
+    var dw = $("drillWeak");
+    if (dw) {
+      dw.addEventListener("click", function () {
+        runKind = "drillonly";
+        startRun(weak);
+      });
+    }
+  }
+
+  /* ==========================================================
+     13 · EXPORT
+     ========================================================== */
+
+  function snapshot() {
+    return {
+      exported: new Date().toISOString(),
+      terms: NT,
+      mastered: TERMS.filter(function (t) { return isMastered(t.id); }).length,
+      sessions: db.ss,
+      perTerm: TERMS.map(function (t) {
+        var e = rec(t.id);
+        return {
+          term: t.term, section: SECTIONS[t.sec],
+          nameRight: e.r0, nameWrong: e.w0, nameStreak: e.s0,
+          defineRight: e.r1, defineWrong: e.w1, defineStreak: e.s1,
+          overrides: e.ov || 0, mastered: isMastered(t.id)
+        };
+      }),
+      answers: db.ev.map(function (e) {
+        return {
+          at: new Date(e[0]).toISOString(),
+          term: TERMS[e[1]] ? TERMS[e[1]].term : "?",
+          direction: e[2] ? "define-it" : "name-it",
+          verdict: ["wrong", "partial", "right", "overridden"][e[3]] || "?"
+        };
+      })
+    };
+  }
+
+  function csv() {
+    var rows = [["term", "section", "name_right", "name_wrong", "name_streak",
+      "define_right", "define_wrong", "define_streak", "overrides", "mastered"]];
+    TERMS.forEach(function (t) {
+      var e = rec(t.id);
+      rows.push([t.term, SECTIONS[t.sec], e.r0, e.w0, e.s0, e.r1, e.w1, e.s1, e.ov || 0, isMastered(t.id) ? 1 : 0]);
+    });
+    return rows.map(function (r) {
+      return r.map(function (c) {
+        var s = String(c);
+        return /[",\n]/.test(s) ? "\"" + s.replace(/"/g, "\"\"") + "\"" : s;
+      }).join(",");
+    }).join("\n");
+  }
+
+  function saveFile(filename, data, fallbackName) {
+    if (!window.claude || !window.claude.downloads) {
+      window.alert("Saving files isn't available in this view. Open the artifact directly and try again.");
+      return;
+    }
+    window.claude.downloads.save({ filename: filename, data: data }).then(function () {
+      /* the viewer confirms the save itself */
+    }, function (err) {
+      var code = err && err.code;
+      if (code === "extension_not_enabled" && fallbackName) {
+        saveFile(fallbackName, data, null);
+        return;
+      }
+      if (code === "declined") return;
+      if (code === "rate_limited") {
+        window.alert("A save prompt is already open. Finish that one, then try again.");
+        return;
+      }
+      if (code === "too_large") {
+        window.alert("That file is over the 16 MB limit. Reset old progress and export again.");
+        return;
+      }
+      window.alert("Couldn't offer the file (" + (code || "unknown") + ").");
+    });
+  }
+
+  $("stJson").addEventListener("click", function () {
+    saveFile("term-drill-progress.json", JSON.stringify(snapshot(), null, 2), null);
+  });
+  $("stCsv").addEventListener("click", function () {
+    saveFile("term-drill-progress.csv", csv(), "term-drill-progress.txt");
+  });
+
+  /* ==========================================================
+     14 · GO
+     ========================================================== */
+
+  paintChips();
+  paintPool();
+  paintStand();
+  show("setup");
+})();
+</script>
